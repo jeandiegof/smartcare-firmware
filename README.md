@@ -1,6 +1,6 @@
-# smartcare-sdk
+# smartcare-firmware
 
-This repository provides the necessary tools to work with SmartCare.
+Firmware and tools necessary to build and flash SmartCare devices using nRF52832
 
 ## Setting up the enviroment to work with NRF52832 using Segger Embedded Studio
 - Download the nRF5 SDK version 16.0.0 clicking [here](https://www.nordicsemi.com/-/media/Software-and-other-downloads/SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip).
