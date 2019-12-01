@@ -54,9 +54,13 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_saadc.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
   $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/battery/battery.c \
+  $(PROJ_DIR)/battery/adc.c \
+  $(PROJ_DIR)/battery/telemetry.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
@@ -79,6 +83,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/ble/peer_manager/pm_buffer.c \
   $(SDK_ROOT)/components/ble/peer_manager/security_dispatcher.c \
   $(SDK_ROOT)/components/ble/peer_manager/security_manager.c \
+  $(SDK_ROOT)/components/ble/ble_services/ble_bas/ble_bas.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh.c \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh_ble.c \
@@ -116,6 +121,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/modules/nrfx/drivers/include \
   $(SDK_ROOT)/components/libraries/experimental_task_manager \
   $(SDK_ROOT)/components/ble/ble_services/ble_hrs_c \
+  $(SDK_ROOT)/components/ble/ble_services/ble_bas \
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/le_oob_rec \
   $(SDK_ROOT)/components/libraries/queue \
   $(SDK_ROOT)/components/libraries/pwr_mgmt \
@@ -216,6 +222,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser/ac_rec_parser \
   $(SDK_ROOT)/components/libraries/stack_guard \
   $(SDK_ROOT)/components/libraries/log/src \
+  $(PROJ_DIR) \
 
 # Libraries common to all targets
 LIB_FILES += \

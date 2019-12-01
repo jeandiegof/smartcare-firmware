@@ -63,6 +63,7 @@
 #include "ble_srv_common.h"
 #include "ble_advdata.h"
 #include "ble_advertising.h"
+#include "ble_bas.h"
 #include "ble_conn_params.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_soc.h"
@@ -82,6 +83,8 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+// Services
+#include "battery/battery.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
@@ -125,9 +128,9 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID;                        
 // YOUR_JOB: Use UUIDs for service(s) used in your application.
 static ble_uuid_t m_adv_uuids[] =                                               /**< Universally unique service identifiers. */
 {
-    {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
+    {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE},
+    {BLE_UUID_BATTERY_SERVICE, BLE_UUID_TYPE_BLE}
 };
-
 
 static void advertising_start(bool erase_bonds);
 
@@ -309,6 +312,7 @@ static void services_init(void)
        err_code = ble_yy_service_init(&yys_init, &yy_init);
        APP_ERROR_CHECK(err_code);
      */
+    bas_init();
 }
 
 

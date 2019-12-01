@@ -1,0 +1,2 @@
+
+void bas_init();
