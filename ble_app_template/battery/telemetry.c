@@ -9,7 +9,7 @@
 // std includes
 
 // local defines
-#define BATTERY_LEVEL_MEASUREMENT_INTERVAL APP_TIMER_TICKS(10000) // ms
+#define BATTERY_LEVEL_MEASUREMENT_INTERVAL APP_TIMER_TICKS(10000)  // ms
 
 // modules
 APP_TIMER_DEF(m_battery_timer);
@@ -34,9 +34,7 @@ void battery_telemetry_stop() {
     APP_ERROR_CHECK(err_code);
 }
 
-static void battery_telemetry_timeout() {
-    request_battery_level();
-}
+static void battery_telemetry_timeout() { request_battery_level(); }
 
 static void battery_timer_init() {
     ret_code_t err_code = NRF_SUCCESS;
@@ -44,9 +42,7 @@ static void battery_timer_init() {
     // err_code = app_timer_init();
     // APP_ERROR_CHECK(err_code);
 
-    err_code = app_timer_create(&m_battery_timer,
-                                APP_TIMER_MODE_REPEATED,
-                                battery_telemetry_timeout);
+    err_code =
+        app_timer_create(&m_battery_timer, APP_TIMER_MODE_REPEATED, battery_telemetry_timeout);
     APP_ERROR_CHECK(err_code);
 }
-
