@@ -14,8 +14,14 @@ BLE_BAS_DEF(m_bas);
 
 static void on_bas_evt(ble_bas_t * p_bas, ble_bas_evt_t * p_evt);
 static void on_battery_level_update(uint8_t battery_level_percentage);
+static void bas_init();
 
-void bas_init() {
+void battery_init() {
+    bas_init();
+    battery_telemetry_init(&on_battery_level_update);
+}
+
+static void bas_init() {
     ble_bas_init_t bas_init;
     memset(&bas_init, 0, sizeof(bas_init));
 
@@ -30,8 +36,6 @@ void bas_init() {
 
     const ret_code_t err_code = ble_bas_init(&m_bas, &bas_init);
     APP_ERROR_CHECK(err_code);
-
-    battery_telemetry_init(&on_battery_level_update);
 }
 
 static void on_bas_evt(ble_bas_t* p_bas, ble_bas_evt_t* p_evt) {

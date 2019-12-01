@@ -1,2 +1,2 @@
 
-void bas_init();
+void battery_init();

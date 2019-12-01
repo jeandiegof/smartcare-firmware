@@ -312,7 +312,7 @@ static void services_init(void)
        err_code = ble_yy_service_init(&yys_init, &yy_init);
        APP_ERROR_CHECK(err_code);
      */
-    bas_init();
+    battery_init();
 }
 
 
