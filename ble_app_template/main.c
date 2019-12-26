@@ -81,7 +81,9 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
+#include "nrf_delay.h"
 
+#include "pca10040/s132/ses/accelerometer.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
@@ -725,9 +727,16 @@ int main(void)
 
     advertising_start(erase_bonds);
 
+    accelerometer_start();
+
     // Enter main loop.
     for (;;)
     {
+        NRF_LOG_INFO("\r\nFalls: %d", accelerometer_fall_count());
+        accelerometer_print_axis_data();
+
+        NRF_LOG_FLUSH();
+        nrf_delay_ms(300);
         idle_state_handle();
     }
 }

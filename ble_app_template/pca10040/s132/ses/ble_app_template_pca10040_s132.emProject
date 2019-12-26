@@ -106,7 +106,9 @@
           <file file_name="adxl345.c" />
           <file file_name="adxl345.h" />
         </folder>
-        <file file_name="accelerometer.c" />
+        <file file_name="accelerometer.c">
+          <configuration Name="Release" c_additional_options="-Werror" />
+        </file>
         <file file_name="accelerometer.h" />
       </folder>
     </folder>
@@ -144,6 +146,7 @@
       <file file_name="$(SDK)/components/softdevice/common/nrf_sdh_ble.c" />
       <file file_name="$(SDK)/components/softdevice/common/nrf_sdh_soc.c" />
     </folder>
+    <configuration Name="Release" c_preprocessor_definitions="DEBUG" />
   </project>
   <configuration
     Name="Release"
