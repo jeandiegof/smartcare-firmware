@@ -66,12 +66,12 @@ static uint8_t m_samples[6] = {0};
 static void twi_handler(nrf_drv_twi_evt_t const *p_event, void *p_context);
 static void on_adxl345_data();
 static void write_data(uint8_t *data, uint8_t size);
-//void read_data(uint8_t reg, uint8_t *data, uint8_t size);
+static void read_data(uint8_t reg, uint8_t *data, uint8_t size);
 static void setup_free_fall_mode();
 static void enable_interrupts();
 static void enable_gpio_interrupt();
 static void wait_for_ongoing_transaction(void);
-void on_int2_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
+static void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
 void adxl345_init(void)
 {
@@ -120,7 +120,7 @@ static void write_data(uint8_t *data, uint8_t size)
     APP_ERROR_CHECK(err_code);
 }
 
-void read_data(uint8_t reg, uint8_t *data, uint8_t size)
+static void read_data(uint8_t reg, uint8_t *data, uint8_t size)
 {
     ret_code_t err_code1 = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, &reg, 1, true);
     APP_ERROR_CHECK(err_code1);
@@ -131,7 +131,6 @@ void read_data(uint8_t reg, uint8_t *data, uint8_t size)
 
 static void setup_free_fall_mode()
 {
-    // values taken from https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf
     uint8_t free_fall_threshold[2] = {THRESH_FF, 0x05};
     write_data(free_fall_threshold, sizeof(free_fall_threshold));
 
@@ -163,7 +162,7 @@ static void enable_gpio_interrupt()
     in_config.pull = NRF_GPIO_PIN_PULLUP;
 
     if (!nrf_drv_gpiote_in_is_set(INT1_PIN)) {
-        err_code = nrf_drv_gpiote_in_init(INT1_PIN, &in_config, on_int2_interrupt);
+        err_code = nrf_drv_gpiote_in_init(INT1_PIN, &in_config, on_int1_interrupt);
         APP_ERROR_CHECK(err_code);
 
         nrf_drv_gpiote_in_event_enable(INT1_PIN, true);
@@ -173,15 +172,13 @@ static void enable_gpio_interrupt()
 }
 
 // callbacks
-
-void on_int2_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     _interrupt_count++;
-    NRF_LOG_INFO("interrupt count: %d", _interrupt_count);
 
     uint8_t interrupt_source = 0;
     read_data(INT_SOURCE, &interrupt_source, sizeof(interrupt_source));
-    NRF_LOG_INFO("interrupt source: %02x", interrupt_source);
+
     if (interrupt_source & 0b00000100)
     {
         _fall_count++;

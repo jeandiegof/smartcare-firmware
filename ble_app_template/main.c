@@ -733,8 +733,6 @@ int main(void)
     for (;;)
     {
         NRF_LOG_INFO("\r\nFalls: %d", accelerometer_fall_count());
-        NRF_LOG_INFO("\r\nPOWER_CTL: %02x", accelerometer_read_register(0x2D));
-        //accelerometer_print_axis_data();
 
         NRF_LOG_FLUSH();
         nrf_delay_ms(300);

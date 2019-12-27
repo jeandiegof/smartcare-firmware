@@ -9,12 +9,6 @@ void accelerometer_start(void) {
     adxl345_start_free_fall_mode();
 }
 
-uint8_t accelerometer_read_register(uint8_t reg) {
-    uint8_t a = 0xAA;
-    read_data(reg, &a, 1);
-    return a;
-}
-
 uint8_t accelerometer_fall_count(void) {
     return adxl345_fall_count();
 }
