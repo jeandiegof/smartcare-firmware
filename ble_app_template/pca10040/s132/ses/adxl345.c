@@ -135,7 +135,7 @@ static void setup_free_fall_mode()
     uint8_t free_fall_threshold[2] = {THRESH_FF, 0x05};
     write_data(free_fall_threshold, sizeof(free_fall_threshold));
 
-    uint8_t free_fall_time[2] = {TIME_FF, 0x02};
+    uint8_t free_fall_time[2] = {TIME_FF, 0x14};
     write_data(free_fall_time, sizeof(free_fall_time));
 }
 
@@ -177,6 +177,7 @@ static void enable_gpio_interrupt()
 void on_int2_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
     _interrupt_count++;
+    NRF_LOG_INFO("interrupt count: %d", _interrupt_count);
 
     uint8_t interrupt_source = 0;
     read_data(INT_SOURCE, &interrupt_source, sizeof(interrupt_source));
