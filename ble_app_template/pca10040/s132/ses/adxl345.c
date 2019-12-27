@@ -51,23 +51,22 @@ typedef uint8_t ADXL345Registers;
 // GPIOs
 #define SCL_PIN     27
 #define SDA_PIN     26
-#define INT1_PIN    13
+#define INT1_PIN    02
 
 // TWI
 #define TWI_INSTANCE_ID 0
 static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 // local variables
-static volatile bool _is_twi_free = true;
-static uint8_t _fall_count = 0;
-static uint8_t _interrupt_count = 0;
+static volatile uint8_t _fall_count = 0;
+static volatile uint8_t _interrupt_count = 0;
 static uint8_t m_samples[6] = {0};
 
 // local functions
 static void twi_handler(nrf_drv_twi_evt_t const *p_event, void *p_context);
 static void on_adxl345_data();
 static void write_data(uint8_t *data, uint8_t size);
-static void read_data(uint8_t reg, uint8_t *data, uint8_t size);
+//void read_data(uint8_t reg, uint8_t *data, uint8_t size);
 static void setup_free_fall_mode();
 static void enable_interrupts();
 static void enable_gpio_interrupt();
@@ -85,7 +84,8 @@ void adxl345_init(void)
         .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
         .clear_bus_init = false};
 
-    err_code = nrf_drv_twi_init(&m_twi, &twi_adxl345_config, twi_handler, NULL);
+    err_code = nrf_drv_twi_init(&m_twi, &twi_adxl345_config, NULL, NULL);
+
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_twi_enable(&m_twi);
@@ -116,32 +116,17 @@ uint8_t adxl345_fall_count(void) {
 
 static void write_data(uint8_t *data, uint8_t size)
 {
-    if (!_is_twi_free)
-    {
-        wait_for_ongoing_transaction();
-    }
-
-    _is_twi_free = false;
-    ret_code_t err_code = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, data, size, false);
+    ret_code_t err_code = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, data, size, true);
     APP_ERROR_CHECK(err_code);
-    wait_for_ongoing_transaction();
 }
 
-static void read_data(uint8_t reg, uint8_t *data, uint8_t size)
+void read_data(uint8_t reg, uint8_t *data, uint8_t size)
 {
-    if (!_is_twi_free)
-    {
-        wait_for_ongoing_transaction();
-    }
-
-    _is_twi_free = false;
-    ret_code_t err_code1 = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, &reg, 1, false);
+    ret_code_t err_code1 = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, &reg, 1, true);
     APP_ERROR_CHECK(err_code1);
-    wait_for_ongoing_transaction();
 
-    ret_code_t err_code = nrf_drv_twi_rx(&m_twi, ADXL345_ADDR, data, size);
+    ret_code_t err_code = nrf_drv_twi_rx(&m_twi, ADXL345_ADDR, (uint8_t*)data, size);
     APP_ERROR_CHECK(err_code);
-    wait_for_ongoing_transaction();
 }
 
 static void setup_free_fall_mode()
@@ -182,11 +167,9 @@ static void enable_gpio_interrupt()
         APP_ERROR_CHECK(err_code);
 
         nrf_drv_gpiote_in_event_enable(INT1_PIN, true);
-    } 
-}
-
-static void wait_for_ongoing_transaction() {
-    while (_is_twi_free == false) {}
+    } else { 
+        NRF_LOG_INFO("\r\nGPIO ALREADY USED");
+    }
 }
 
 // callbacks
@@ -201,26 +184,5 @@ void on_int2_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
     if (interrupt_source & 0b00000100)
     {
         _fall_count++;
-    }
-}
-
-static void twi_handler(nrf_drv_twi_evt_t const *p_event, void *p_context)
-{
-    NRF_LOG_INFO("\r\nEvent handler: %d", p_event->type);
-    switch (p_event->type)
-    {
-    case NRF_DRV_TWI_EVT_DONE:
-        if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
-        {
-            NRF_LOG_INFO("\r\nRX DONE");
-        }
-        if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_TX)
-        {
-            NRF_LOG_INFO("\r\nTX DONE");
-        }
-        _is_twi_free = true;
-        break;
-    default:
-        break;
     }
 }

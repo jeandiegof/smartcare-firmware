@@ -7,3 +7,4 @@ void adxl345_setup(void);
 const uint8_t * adxl345_request_axis_data(void);
 void adxl345_start_free_fall_mode(void);
 uint8_t adxl345_fall_count(void);
+void read_data(uint8_t reg, uint8_t *data, uint8_t size);
