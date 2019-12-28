@@ -111,6 +111,14 @@
         </file>
         <file file_name="accelerometer.h" />
       </folder>
+      <folder Name="heart_rate">
+        <folder Name="max30101">
+          <file file_name="max30101.c" />
+          <file file_name="max30101.h" />
+        </folder>
+        <file file_name="heart_rate.c" />
+        <file file_name="heart_rate.h" />
+      </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="$(SDK)/external/segger_rtt/SEGGER_RTT.c" />
