@@ -2,17 +2,15 @@
 
 #include "app_error.h"
 #include "boards.h"
+#include "nrf.h"
+#include "nrf_drv_gpiote.h"
 #include "nrf_drv_twi.h"
 #include "nrf_log.h"
-#include "boards.h"
-#include "nrf_drv_gpiote.h"
 #include "nrf_log_ctrl.h"
 #include <nrfx_gpiote.h>
-#include "nrf.h"
 #include <stdint.h>
 
-enum ADXL345Registers
-{
+enum ADXL345Registers {
     DEVID = 0x00,
     THRESH_TAP = 0x1D,
     OFSX = 0x1E,
@@ -49,9 +47,11 @@ typedef uint8_t ADXL345Registers;
 #define ADXL345_ADDR 0x53U
 
 // GPIOs
-#define SCL_PIN     27
-#define SDA_PIN     26
-#define INT1_PIN    02
+enum ADXL345Pins {
+    SCL_PIN = 27,
+    SDA_PIN = 26,
+    INT1_PIN = 02,
+};
 
 // TWI
 #define TWI_INSTANCE_ID 0
@@ -73,8 +73,7 @@ static void enable_gpio_interrupt();
 static void wait_for_ongoing_transaction(void);
 static void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
-void adxl345_init(void)
-{
+void adxl345_init(void) {
     ret_code_t err_code;
 
     const nrf_drv_twi_config_t twi_adxl345_config = {
@@ -91,46 +90,41 @@ void adxl345_init(void)
     nrf_drv_twi_enable(&m_twi);
 }
 
-void adxl345_setup(void)
-{
+void adxl345_setup(void) {
     uint8_t reg[2] = {POWER_CTL, 0x08};
     write_data(reg, sizeof(reg));
 }
 
-void adxl345_start_free_fall_mode(void)
-{
+void adxl345_start_free_fall_mode(void) {
     setup_free_fall_mode();
     enable_gpio_interrupt();
     enable_interrupts();
 }
 
-const uint8_t * adxl345_request_axis_data(void)
-{
+const uint8_t *adxl345_request_axis_data(void) {
     read_data(DATAX0, m_samples, 6);
     return m_samples;
 }
 
 uint8_t adxl345_fall_count(void) {
     return _fall_count;
-} 
+}
 
-static void write_data(uint8_t *data, uint8_t size)
-{
+// TODO: move to an i2c handler
+static void write_data(uint8_t *data, uint8_t size) {
     ret_code_t err_code = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, data, size, true);
     APP_ERROR_CHECK(err_code);
 }
 
-static void read_data(uint8_t reg, uint8_t *data, uint8_t size)
-{
+static void read_data(uint8_t reg, uint8_t *data, uint8_t size) {
     ret_code_t err_code1 = nrf_drv_twi_tx(&m_twi, ADXL345_ADDR, &reg, 1, true);
     APP_ERROR_CHECK(err_code1);
 
-    ret_code_t err_code = nrf_drv_twi_rx(&m_twi, ADXL345_ADDR, (uint8_t*)data, size);
+    ret_code_t err_code = nrf_drv_twi_rx(&m_twi, ADXL345_ADDR, (uint8_t *)data, size);
     APP_ERROR_CHECK(err_code);
 }
 
-static void setup_free_fall_mode()
-{
+static void setup_free_fall_mode() {
     uint8_t free_fall_threshold[2] = {THRESH_FF, 0x05};
     write_data(free_fall_threshold, sizeof(free_fall_threshold));
 
@@ -138,8 +132,7 @@ static void setup_free_fall_mode()
     write_data(free_fall_time, sizeof(free_fall_time));
 }
 
-static void enable_interrupts()
-{
+static void enable_interrupts() {
     // map only free fall interrupt to INT1 pin
     uint8_t interrupt_map[2] = {INT_MAP, 0b11111011};
     write_data(interrupt_map, sizeof(interrupt_map));
@@ -149,8 +142,7 @@ static void enable_interrupts()
     write_data(interrupt_enable, sizeof(interrupt_enable));
 }
 
-static void enable_gpio_interrupt()
-{
+static void enable_gpio_interrupt() {
     ret_code_t err_code;
 
     if (!nrf_drv_gpiote_is_init()) {
@@ -166,21 +158,19 @@ static void enable_gpio_interrupt()
         APP_ERROR_CHECK(err_code);
 
         nrf_drv_gpiote_in_event_enable(INT1_PIN, true);
-    } else { 
+    } else {
         NRF_LOG_INFO("\r\nGPIO ALREADY USED");
     }
 }
 
 // callbacks
-void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
-{
+void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
     _interrupt_count++;
 
     uint8_t interrupt_source = 0;
     read_data(INT_SOURCE, &interrupt_source, sizeof(interrupt_source));
 
-    if (interrupt_source & 0b00000100)
-    {
+    if (interrupt_source & 0b00000100) {
         _fall_count++;
     }
 }
