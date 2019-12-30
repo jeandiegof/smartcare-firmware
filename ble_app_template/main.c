@@ -84,6 +84,7 @@
 #include "nrf_delay.h"
 
 #include "pca10040/s132/ses/accelerometer.h"
+#include "pca10040/s132/ses/heart_rate.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
@@ -728,6 +729,7 @@ int main(void)
     advertising_start(erase_bonds);
 
     accelerometer_start();
+    heart_rate_start();
 
     // Enter main loop.
     for (;;)

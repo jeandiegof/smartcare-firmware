@@ -118,6 +118,10 @@
         </folder>
         <file file_name="heart_rate.c" />
         <file file_name="heart_rate.h" />
+        <folder Name="max30100">
+          <file file_name="max30100.c" />
+          <file file_name="max30100.h" />
+        </folder>
       </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
