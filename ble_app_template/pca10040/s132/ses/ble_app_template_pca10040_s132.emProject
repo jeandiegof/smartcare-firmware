@@ -123,6 +123,12 @@
           <file file_name="max30100.h" />
         </folder>
       </folder>
+      <folder Name="peripherals">
+        <folder Name="twi">
+          <file file_name="twi.c" />
+          <file file_name="twi.h" />
+        </folder>
+      </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="$(SDK)/external/segger_rtt/SEGGER_RTT.c" />

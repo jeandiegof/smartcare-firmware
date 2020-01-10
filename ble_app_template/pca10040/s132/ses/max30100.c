@@ -1,4 +1,5 @@
 #include "max30101.h"
+#include "twi.h"
 
 #include "app_error.h"
 #include "nrf.h"
@@ -107,17 +108,13 @@ typedef struct __attribute__((packed)) {
 #define CIRCULAR_QUEUE_SIZE 10
 
 // TWI
-#define TWI_INSTANCE_ID 1
-static const nrf_drv_twi_t _twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+static const nrf_drv_twi_t* _twi;
 
 // local variables
 static RawData _raw_data_queue[CIRCULAR_QUEUE_SIZE] = {0};
 static typeof(CIRCULAR_QUEUE_SIZE) _circular_queue_index = 0;
 
 // local functions
-static void twi_init(void);
-static void write_data(const uint8_t *data, uint8_t size);
-static void read_data(uint8_t reg, uint8_t *data, uint8_t size);
 static void set_mode(Mode mode);
 static void set_sampling_rate(SamplingRate sampling_rate);
 static void set_pulse_width(PulseWidth pulse_width);
@@ -126,6 +123,7 @@ static void set_leds_current(LedCurrent red_led, LedCurrent ir_led);
 static void set_high_resolution_mode(HighResolutionMode high_resolution);
 static void enable_interrupts(uint8_t interrupts);
 static void disable_interrupts(uint8_t interrupts);
+static void clear_interrupts(void);
 static void read_data_from_fifo(RawData* raw_data);
 
 static void enable_gpio_interrupt();
@@ -133,67 +131,68 @@ static void on_gpio_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t ac
 
 // public interface
 void max30100_init(void) {
-    twi_init();
+    _twi = twi_init(SCL_PIN, SDA_PIN);
     enable_gpio_interrupt();
 }
 
 void max30100_setup(void) {
-    set_mode(HR_ONLY_ENABLED);
+    set_mode(SPO2_ENABLED);
     set_sampling_rate(SAMPLING_RATE_1000HZ);
     set_pulse_width(PULSE_WIDTH_1600US_16BITS);
     set_leds_current(CURRENT_11_0MA, CURRENT_11_0MA);
     set_high_resolution_mode(HIGH_RESOLUTION_ENABLED);
-    enable_interrupts(INTERRUPT_POWER_READY);
+    enable_interrupts(INTERRUPT_POWER_READY | INTERRUPT_SPO2_DATA_READY);
+    clear_interrupts();
 }
 
 static void set_mode(Mode mode) {
     uint8_t current_mode_config = 0;
-    read_data(MODE_CONFIG, &current_mode_config, sizeof(current_mode_config));
+    twi_read_data(_twi, MAX30100_ADDRESS, MODE_CONFIG, &current_mode_config, sizeof(current_mode_config));
 
     const uint8_t mode_config[] = {MODE_CONFIG, (current_mode_config & 0b11111000) | mode};
-    write_data(mode_config, sizeof(mode_config));
+    twi_write_data(_twi, MAX30100_ADDRESS, mode_config, sizeof(mode_config));
 }
 
 static void set_sampling_rate(SamplingRate sampling_rate) {
     uint8_t current_spo2_config = 0;
-    read_data(SPO2_CONFIG, &current_spo2_config, sizeof(current_spo2_config));
+    twi_read_data(_twi, MAX30100_ADDRESS, SPO2_CONFIG, &current_spo2_config, sizeof(current_spo2_config));
 
     const uint8_t sampling_rate_config[] = {
         SPO2_CONFIG,
         (current_spo2_config & 0b11100011) | (sampling_rate << 2)};
-    write_data(sampling_rate_config, sizeof(sampling_rate_config));
+    twi_write_data(_twi, MAX30100_ADDRESS, sampling_rate_config, sizeof(sampling_rate_config));
 }
 
 static void set_pulse_width(PulseWidth pulse_width) {
     uint8_t current_spo2_config = 0;
-    read_data(SPO2_CONFIG, &current_spo2_config, sizeof(current_spo2_config));
+    twi_read_data(_twi, MAX30100_ADDRESS, SPO2_CONFIG, &current_spo2_config, sizeof(current_spo2_config));
 
     const uint8_t pulse_width_config[] = {
         SPO2_CONFIG,
         (current_spo2_config & 0b11111100) | pulse_width};
-    write_data(pulse_width_config, sizeof(pulse_width_config));
+    twi_write_data(_twi, MAX30100_ADDRESS, pulse_width_config, sizeof(pulse_width_config));
 }
 
 static void set_leds_current(LedCurrent red_led, LedCurrent ir_led) {
     const uint8_t led_config[] = {
         LED_CONFIG,
         (red_led << 4) | ir_led};
-    write_data(led_config, sizeof(led_config));
+    twi_write_data(_twi, MAX30100_ADDRESS, led_config, sizeof(led_config));
 }
 
 static void set_high_resolution_mode(HighResolutionMode high_resolution) {
     uint8_t current_spo2_config = 0;
-    read_data(SPO2_CONFIG, &current_spo2_config, sizeof(current_spo2_config));
+    twi_read_data(_twi, MAX30100_ADDRESS, SPO2_CONFIG, &current_spo2_config, sizeof(current_spo2_config));
 
     const uint8_t high_resolution_config[] = {
         SPO2_CONFIG,
         (current_spo2_config & 0b10111111) | (high_resolution << 6)};
-    write_data(high_resolution_config, sizeof(high_resolution_config));
+    twi_write_data(_twi, MAX30100_ADDRESS, high_resolution_config, sizeof(high_resolution_config));
 }
 
 static void read_data_from_fifo(RawData *raw_data) {
     uint8_t data[4];
-    read_data(FIFO_DATA_REGISTER, data, sizeof(data));
+    twi_read_data(_twi, MAX30100_ADDRESS, FIFO_DATA_REGISTER, data, sizeof(data));
 
     raw_data->ir_led = (data[0] << 8) | data[1];
     raw_data->red_led = (data[2] << 8) | data[3];
@@ -203,24 +202,29 @@ static void read_data_from_fifo(RawData *raw_data) {
 
 static void enable_interrupts(uint8_t interrupts) {
     uint8_t current_enabled_interrupts = 0;
-    read_data(INTERRUPT_ENABLE, &current_enabled_interrupts, sizeof(current_enabled_interrupts));
+    twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_ENABLE, &current_enabled_interrupts, sizeof(current_enabled_interrupts));
 
     const uint8_t interrupt_enable[] = {
         INTERRUPT_ENABLE, 
         current_enabled_interrupts | interrupts
     };
-    write_data(interrupt_enable, sizeof(interrupt_enable));
+    twi_write_data(_twi, MAX30100_ADDRESS, interrupt_enable, sizeof(interrupt_enable));
 }
 
 static void disable_interrupts(uint8_t interrupts) {
     uint8_t current_disabled_interrupts = 0;
-    read_data(INTERRUPT_ENABLE, &current_disabled_interrupts, sizeof(current_disabled_interrupts));
+    twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_ENABLE, &current_disabled_interrupts, sizeof(current_disabled_interrupts));
 
     const uint8_t interrupt_enable[] = {
         INTERRUPT_ENABLE, 
         current_disabled_interrupts & (~interrupts)
     };
-    write_data(interrupt_enable, sizeof(interrupt_enable));
+    twi_write_data(_twi, MAX30100_ADDRESS, interrupt_enable, sizeof(interrupt_enable));
+}
+
+static void clear_interrupts(void) {
+    uint8_t interrupt_status = 0;
+    twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_STATUS, &interrupt_status, sizeof(interrupt_status));
 }
 
 static void enable_gpio_interrupt() {
@@ -248,42 +252,10 @@ static void enable_gpio_interrupt() {
     }
 }
 
-// TODO: change the function signature to receive an i2c
-// handle and move this i2c related stuff to an i2c handler
-static void twi_init() {
-    ret_code_t err_code;
-
-    const nrf_drv_twi_config_t twi_max30100_config = {
-        .scl = SCL_PIN,
-        .sda = SDA_PIN,
-        .frequency = NRF_DRV_TWI_FREQ_100K,
-        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
-        .clear_bus_init = false};
-
-    err_code = nrf_drv_twi_init(&_twi, &twi_max30100_config, NULL, NULL);
-
-    APP_ERROR_CHECK(err_code);
-
-    nrf_drv_twi_enable(&_twi);
-}
-
-static void write_data(const uint8_t *data, uint8_t size) {
-//    ret_code_t err_code = nrf_drv_twi_tx(&_twi, MAX30100_ADDRESS, data, size, true);
-//    APP_ERROR_CHECK(err_code);
-}
-
-static void read_data(uint8_t reg, uint8_t *data, uint8_t size) {
-//    ret_code_t err_code1 = nrf_drv_twi_tx(&_twi, MAX30100_ADDRESS, &reg, 1, true);
-//    APP_ERROR_CHECK(err_code1);
-//
-//    ret_code_t err_code = nrf_drv_twi_rx(&_twi, MAX30100_ADDRESS, (uint8_t *)data, size);
-//    APP_ERROR_CHECK(err_code);
-}
-
 // callbacks
 static void on_gpio_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
     uint8_t interrupt_status = 0;
-    read_data(INTERRUPT_STATUS, &interrupt_status, sizeof(interrupt_status));
+    twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_STATUS, &interrupt_status, sizeof(interrupt_status));
 
     if (interrupt_status & INTERRUPT_POWER_READY) {
         // TODO: shouldn't be called from inside the interruption
