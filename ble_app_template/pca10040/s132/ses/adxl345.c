@@ -113,7 +113,7 @@ static void enable_free_fall_interrupt(void) {
     twi_write_data(_twi, ADXL345_ADDR, interrupt_enable, sizeof(interrupt_enable));
 }
 
-void static enable_measurement_mode(void) {
+static void enable_measurement_mode(void) {
     uint8_t current_measurement_mode = 0;
     twi_read_data(_twi, ADXL345_ADDR, POWER_CTL, &current_measurement_mode, sizeof(current_measurement_mode));
 
