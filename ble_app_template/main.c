@@ -723,7 +723,7 @@ int main(void)
     conn_params_init();
     peer_manager_init();
 
-    // SmartCare Initialize.
+    // SmartCare Initialization.
     gpio_init();
 
     // Start execution.

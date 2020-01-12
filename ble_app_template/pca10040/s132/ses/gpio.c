@@ -12,7 +12,6 @@ void gpio_init(void) {
         err_code = nrf_drv_gpiote_init();
         APP_ERROR_CHECK(err_code);
     }
-
 }
 
 void enable_gpio_interrupt(uint8_t pin, interrupt_callback callback, nrf_gpiote_polarity_t sense, nrf_gpio_pin_pull_t pull) {

@@ -66,6 +66,7 @@ static uint8_t m_samples[6] = {0};
 
 // local functions
 static void setup_free_fall_mode(void);
+static void map_free_fall_interrupt_to_int1(void);
 static void enable_free_fall_interrupt(void);
 static void enable_measurement_mode(void);
 static void clear_interrupts(void);
@@ -82,6 +83,7 @@ void adxl345_setup(void) {
 
 void adxl345_start_free_fall_mode(void) {
     setup_free_fall_mode();
+    map_free_fall_interrupt_to_int1();
     enable_free_fall_interrupt();
     clear_interrupts();
 }
@@ -103,13 +105,19 @@ static void setup_free_fall_mode(void) {
     twi_write_data(_twi, ADXL345_ADDR, free_fall_time, sizeof(free_fall_time));
 }
 
-static void enable_free_fall_interrupt(void) {
-    // map only free fall interrupt to INT1 pin
-    uint8_t interrupt_map[2] = {INT_MAP, 0b11111011};
-    twi_write_data(_twi, ADXL345_ADDR, interrupt_map, sizeof(interrupt_map));
+static void map_free_fall_interrupt_to_int1(void) {
+    uint8_t current_interrupts_map = 0;
+    twi_read_data(_twi, ADXL345_ADDR, INT_MAP, &current_interrupts_map, sizeof(current_interrupts_map));
 
-    // enable free fall interupt
-    uint8_t interrupt_enable[2] = {INT_ENABLE, 0b00000100};
+    uint8_t interrupt_map[2] = {INT_MAP, current_interrupts_map & 0b11111011};
+    twi_write_data(_twi, ADXL345_ADDR, interrupt_map, sizeof(interrupt_map));
+}
+
+static void enable_free_fall_interrupt(void) {
+    uint8_t current_interrupts_enabled = 0;
+    twi_read_data(_twi, ADXL345_ADDR, INT_ENABLE, &current_interrupts_enabled, sizeof(current_interrupts_enabled));
+
+    uint8_t interrupt_enable[2] = {INT_ENABLE, current_interrupts_enabled | 0x04};
     twi_write_data(_twi, ADXL345_ADDR, interrupt_enable, sizeof(interrupt_enable));
 }
 
@@ -117,7 +125,7 @@ static void enable_measurement_mode(void) {
     uint8_t current_measurement_mode = 0;
     twi_read_data(_twi, ADXL345_ADDR, POWER_CTL, &current_measurement_mode, sizeof(current_measurement_mode));
 
-    const uint8_t measurement_mode[2] = {POWER_CTL, (current_measurement_mode & 0b11110111) | 0x08};
+    const uint8_t measurement_mode[2] = {POWER_CTL, current_measurement_mode | 0x08};
     twi_write_data(_twi, ADXL345_ADDR, measurement_mode, sizeof(measurement_mode));
 }
 
