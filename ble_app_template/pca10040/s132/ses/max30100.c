@@ -1,13 +1,10 @@
 #include "max30101.h"
 #include "twi.h"
+#include "gpio.h"
 
 #include "app_error.h"
 #include "nrf.h"
-#include "nrf_drv_twi.h"
 #include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_drv_gpiote.h"
-#include <nrfx_gpiote.h>
 
 #include <stdint.h>
 
@@ -126,13 +123,12 @@ static void disable_interrupts(uint8_t interrupts);
 static void clear_interrupts(void);
 static void read_data_from_fifo(RawData* raw_data);
 
-static void enable_gpio_interrupt();
 static void on_gpio_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
 
 // public interface
 void max30100_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
-    enable_gpio_interrupt();
+    enable_gpio_interrupt(INT_PIN, &on_gpio_interrupt, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
 }
 
 void max30100_setup(void) {
@@ -225,31 +221,6 @@ static void disable_interrupts(uint8_t interrupts) {
 static void clear_interrupts(void) {
     uint8_t interrupt_status = 0;
     twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_STATUS, &interrupt_status, sizeof(interrupt_status));
-}
-
-static void enable_gpio_interrupt() {
-    ret_code_t err_code;
-
-    if (!nrf_drv_gpiote_is_init())
-    {
-        err_code = nrf_drv_gpiote_init();
-        APP_ERROR_CHECK(err_code);
-    }
-
-    nrf_drv_gpiote_in_config_t in_config = GPIOTE_CONFIG_IN_SENSE_HITOLO(true);
-    in_config.pull = NRF_GPIO_PIN_PULLUP;
-
-    if (!nrf_drv_gpiote_in_is_set(INT_PIN))
-    {
-        err_code = nrf_drv_gpiote_in_init(INT_PIN, &in_config, on_gpio_interrupt);
-        APP_ERROR_CHECK(err_code);
-
-        nrf_drv_gpiote_in_event_enable(INT_PIN, true);
-    }
-    else
-    {
-        NRF_LOG_INFO("\r\nGPIO %d already used.", INT_PIN);
-    }
 }
 
 // callbacks

@@ -128,6 +128,10 @@
           <file file_name="twi.c" />
           <file file_name="twi.h" />
         </folder>
+        <folder Name="gpio">
+          <file file_name="gpio.c" />
+          <file file_name="gpio.h" />
+        </folder>
       </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">

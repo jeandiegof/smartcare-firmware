@@ -85,6 +85,7 @@
 
 #include "pca10040/s132/ses/accelerometer.h"
 #include "pca10040/s132/ses/heart_rate.h"
+#include "pca10040/s132/ses/gpio.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
@@ -721,6 +722,9 @@ int main(void)
     services_init();
     conn_params_init();
     peer_manager_init();
+
+    // SmartCare Initialization.
+    gpio_init();
 
     // Start execution.
     NRF_LOG_INFO("Template example started.");
