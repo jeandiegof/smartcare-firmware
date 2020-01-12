@@ -5,9 +5,6 @@
 #include "app_error.h"
 #include "nrf.h"
 #include "nrf_log.h"
-#include "nrf_gpio.h"
-#include "nrf_gpiote.h"
-#include "nrf_drv_twi.h"
 
 #include <stdint.h>
 

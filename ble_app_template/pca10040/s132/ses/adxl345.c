@@ -6,9 +6,6 @@
 #include "boards.h"
 #include "nrf.h"
 #include "nrf_log.h"
-#include "nrf_gpio.h"
-#include "nrf_gpiote.h"
-#include "nrf_drv_twi.h"
 #include <nrfx_gpiote.h>
 #include <stdint.h>
 
