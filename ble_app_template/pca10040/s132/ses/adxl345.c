@@ -113,7 +113,7 @@ static void enable_free_fall_interrupt(void) {
     uint8_t current_interrupts_enabled = 0;
     twi_read_data(_twi, ADXL345_ADDR, INT_ENABLE, &current_interrupts_enabled, sizeof(current_interrupts_enabled));
 
-    const uint8_t interrupt_enable[2] = {INT_ENABLE, current_interrupts_enabled | 0x00000100};
+    const uint8_t interrupt_enable[2] = {INT_ENABLE, current_interrupts_enabled | 0b00000100};
     twi_write_data(_twi, ADXL345_ADDR, interrupt_enable, sizeof(interrupt_enable));
 }
 
@@ -121,7 +121,7 @@ static void enable_measurement_mode(void) {
     uint8_t current_measurement_mode = 0;
     twi_read_data(_twi, ADXL345_ADDR, POWER_CTL, &current_measurement_mode, sizeof(current_measurement_mode));
 
-    const uint8_t measurement_mode[2] = {POWER_CTL, current_measurement_mode | 0x00001000};
+    const uint8_t measurement_mode[2] = {POWER_CTL, current_measurement_mode | 0b00001000};
     twi_write_data(_twi, ADXL345_ADDR, measurement_mode, sizeof(measurement_mode));
 }
 
