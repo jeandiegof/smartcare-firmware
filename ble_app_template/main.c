@@ -739,6 +739,8 @@ int main(void)
     for (;;)
     {
         NRF_LOG_INFO("\r\nFalls: %d", accelerometer_fall_count());
+        NRF_LOG_INFO("\r\nActivity: %d", accelerometer_activity_count());
+        NRF_LOG_INFO("\r\nInactivity: %d", accelerometer_inactivity_count());
 
         NRF_LOG_FLUSH();
         nrf_delay_ms(300);
