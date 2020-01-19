@@ -56,10 +56,10 @@ enum ADXL345Pins {
 static const nrf_drv_twi_t *_twi;
 
 // local variables
-static volatile uint8_t _fall_count = 0;
-static volatile uint8_t _activity_count = 0;
-static volatile uint8_t _inactivity_count = 0;
-static volatile uint8_t _interrupt_count = 0;
+static bool _is_interrupt_available = false;
+static uint8_t _fall_count = 0;
+static uint8_t _activity_count = 0;
+static uint8_t _inactivity_count = 0;
 static uint8_t m_samples[6] = {0};
 
 // local functions
@@ -73,8 +73,10 @@ static void enable_activity_interrupt(void);
 static void setup_inactivity_detection_mode(void);
 static void map_inactivity_interrupt_to_int1(void);
 static void enable_inactivity_interrupt(void);
-static void clear_interrupts(void);
+static void clear_interrupts_status(void);
 static void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action);
+static void clear_available_interrupts(void);
+static uint8_t read_interrupt_source(void);
 
 void adxl345_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
@@ -89,21 +91,21 @@ void adxl345_start_free_fall_mode(void) {
     setup_free_fall_mode();
     map_free_fall_interrupt_to_int1();
     enable_free_fall_interrupt();
-    clear_interrupts();
+    clear_interrupts_status();
 }
 
 void adxl345_start_activity_detection_mode(void) {
     setup_activity_detection_mode();
     map_activity_interrupt_to_int1();
     enable_activity_interrupt();
-    clear_interrupts();
+    clear_interrupts_status();
 }
 
 void adxl345_start_inactivity_detection_mode(void) {
     setup_inactivity_detection_mode();
     map_inactivity_interrupt_to_int1();
     enable_inactivity_interrupt();
-    clear_interrupts();
+    clear_interrupts_status();
 }
 
 const uint8_t *adxl345_request_axis_data(void) {
@@ -121,6 +123,25 @@ uint8_t adxl345_activity_count(void) {
 
 uint8_t adxl345_inactivity_count(void) {
     return _inactivity_count;
+}
+
+bool adxl345_is_interrupt_available(void) {
+    return _is_interrupt_available;
+}
+
+void adxl345_handle_interrupts() {
+    uint8_t interrupt_source = read_interrupt_source();
+    clear_available_interrupts();
+
+    if (interrupt_source & 0b00000100) {
+        _fall_count++;
+    }
+    if (interrupt_source & 0b00010000) {
+        _activity_count++;
+    }
+    if (interrupt_source & 0b00001000) {
+        _inactivity_count++;
+    }
 }
 
 static void enable_measurement_mode(void) {
@@ -216,24 +237,21 @@ static void enable_inactivity_interrupt(void) {
 }
 
 // Interrupts
-static void clear_interrupts(void) {
-    uint8_t interrupt_status = 0;
-    twi_read_data(_twi, ADXL345_ADDR, INT_SOURCE, &interrupt_status, sizeof(interrupt_status));
+static void clear_interrupts_status(void) {
+    read_interrupt_source();
+    clear_available_interrupts();
 }
 
 void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
-    _interrupt_count++;
+    _is_interrupt_available = true;
+}
 
+static void clear_available_interrupts(void) {
+    _is_interrupt_available = false;
+}
+
+static uint8_t read_interrupt_source(void) {
     uint8_t interrupt_source = 0;
     twi_read_data(_twi, ADXL345_ADDR, INT_SOURCE, &interrupt_source, sizeof(interrupt_source));
-
-    if (interrupt_source & 0b00000100) {
-        _fall_count++;
-    }
-    if (interrupt_source & 0b00010000) {
-        _activity_count++;
-    }
-    if (interrupt_source & 0b00001000) {
-        _inactivity_count++;
-    }
+    return interrupt_source;
 }

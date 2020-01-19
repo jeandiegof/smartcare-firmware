@@ -738,9 +738,12 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        NRF_LOG_INFO("\r\nFalls: %d", accelerometer_fall_count());
-        NRF_LOG_INFO("\r\nActivity: %d", accelerometer_activity_count());
-        NRF_LOG_INFO("\r\nInactivity: %d", accelerometer_inactivity_count());
+        if (is_interrupt_available()) {
+            handle_interrupts();
+            NRF_LOG_INFO("\r\nFalls: %d, Activity: %d, Inactivity: %d",
+                accelerometer_fall_count(), accelerometer_activity_count(), accelerometer_inactivity_count()
+            );
+        }
 
         NRF_LOG_FLUSH();
         nrf_delay_ms(300);

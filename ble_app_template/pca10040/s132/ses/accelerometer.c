@@ -23,6 +23,14 @@ uint8_t accelerometer_inactivity_count(void) {
     return adxl345_inactivity_count();
 }
 
+bool is_interrupt_available(void) {
+    return adxl345_is_interrupt_available();
+}
+
+void handle_interrupts(void) {
+    adxl345_handle_interrupts();
+}
+
 void accelerometer_print_axis_data(void) {
     const uint8_t * samples = adxl345_request_axis_data();
     
