@@ -139,6 +139,20 @@
         <file file_name="ble_custom.h" />
         <file file_name="ble_custom.c" />
       </folder>
+      <folder Name="ble">
+        <folder Name="services">
+          <folder Name="emergency">
+            <file file_name="emergency.c" />
+            <file file_name="emergency.h" />
+            <file file_name="emergency_chars.c" />
+            <file file_name="emergency_chars.h" />
+          </folder>
+        </folder>
+        <folder Name="utils">
+          <file file_name="utils.c" />
+          <file file_name="utils.h" />
+        </folder>
+      </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="$(SDK)/external/segger_rtt/SEGGER_RTT.c" />

@@ -88,6 +88,7 @@
 #include "pca10040/s132/ses/events.h"
 #include "pca10040/s132/ses/gpio.h"
 #include "pca10040/s132/ses/ble_custom.h"
+#include "pca10040/s132/ses/emergency.h"
 
 #define DEVICE_NAME "Nordic_Template"           /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME "NordicSemiconductor" /**< Manufacturer. Will be passed to Device Information Service. */
@@ -120,7 +121,7 @@
 NRF_BLE_GATT_DEF(m_gatt);           /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);             /**< Context for the Queued Write module.*/
 BLE_ADVERTISING_DEF(m_advertising); /**< Advertising module instance. */
-BLE_CUS_DEF(m_cus);
+BLE_EMERGENCY_DEF(m_emergency_service);
 
 static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the current connection. */
 
@@ -250,7 +251,6 @@ static void nrf_qwr_error_handler(uint32_t nrf_error)
     APP_ERROR_HANDLER(nrf_error);
 }
 
-
 /**@brief Function for handling the YYY Service events.
  * YOUR_JOB implement a service handler function depending on the event the service you are using can generate
  *
@@ -312,12 +312,11 @@ static void services_init(void)
        err_code = ble_yy_service_init(&yys_init, &yy_init);
        APP_ERROR_CHECK(err_code);
      */
-    // Initialize CUS Service init structure to zero.
-    ble_cus_init_t cus_init;
+    ble_emergency_service_init_t cus_init;
     memset(&cus_init, 0, sizeof(cus_init));
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cus_init.custom_value_char_attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cus_init.custom_value_char_attr_md.write_perm);
-    err_code = ble_cus_init(&m_cus, &cus_init);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cus_init.emergency_status_char_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cus_init.emergency_status_char_attr_md.write_perm);
+    err_code = ble_emergency_init(&m_emergency_service, &cus_init);
     APP_ERROR_CHECK(err_code);
 }
 

@@ -1,0 +1,15 @@
+#pragma once
+
+#include "ble_srv_common.h"
+
+#include <stdio.h>
+
+uint32_t add_vendor_specific_base_uuid(ble_uuid128_t base_uuid, uint8_t* uuid_type);
+uint32_t add_service(uint16_t uuid, uint8_t uuid_type, uint16_t* handle);
+ble_gatts_attr_md_t get_characteristic_configuration_descriptor_metadata(void);
+ble_gatts_char_md_t get_characteristic_metadata(ble_gatts_attr_md_t* cccd_md, bool read, bool write,
+                                                bool notify);
+ble_gatts_attr_md_t get_attribute_metadata(ble_gap_conn_sec_mode_t read_permission,
+                                           ble_gap_conn_sec_mode_t write_permission);
+ble_uuid_t get_ble_uuid_structure(uint8_t type, uint16_t uuid);
+ble_gatts_attr_t get_u8_attribute_structure(ble_uuid_t* ble_uuid, ble_gatts_attr_md_t* attr_md);
