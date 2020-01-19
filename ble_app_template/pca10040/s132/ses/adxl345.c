@@ -164,7 +164,7 @@ static void setup_activity_detection_mode(void) {
     uint8_t current_activity_inactivity_control = 0;
     twi_read_data(_twi, ADXL345_ADDR, ACT_INACT_CTL, &current_activity_inactivity_control, sizeof(current_activity_inactivity_control));
 
-    const uint8_t activity_enable[2] = {INT_ENABLE, current_activity_inactivity_control | 0b11110000}; // AC-coupled, X, Y, Z
+    const uint8_t activity_enable[2] = {ACT_INACT_CTL, current_activity_inactivity_control | 0b11110000}; // AC-coupled, X, Y, Z
     twi_write_data(_twi, ADXL345_ADDR, activity_enable, sizeof(activity_enable));
 }
 
@@ -195,7 +195,7 @@ static void setup_inactivity_detection_mode(void) {
     uint8_t current_activity_inactivity_control = 0;
     twi_read_data(_twi, ADXL345_ADDR, ACT_INACT_CTL, &current_activity_inactivity_control, sizeof(current_activity_inactivity_control));
 
-    const uint8_t inactivity_enable[2] = {INT_ENABLE, current_activity_inactivity_control | 0b00001111}; // AC-coupled, X, Y, Z
+    const uint8_t inactivity_enable[2] = {ACT_INACT_CTL, current_activity_inactivity_control | 0b00001111}; // AC-coupled, X, Y, Z
     twi_write_data(_twi, ADXL345_ADDR, inactivity_enable, sizeof(inactivity_enable));
 }
 
