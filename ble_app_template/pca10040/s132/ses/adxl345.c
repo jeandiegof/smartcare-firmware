@@ -229,9 +229,11 @@ void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
 
     if (interrupt_source & 0b00000100) {
         _fall_count++;
-    } else if (interrupt_source & 0b00010000) {
+    }
+    if (interrupt_source & 0b00010000) {
         _activity_count++;
-    } else if (interrupt_source & 0b00001000) {
+    }
+    if (interrupt_source & 0b00001000) {
         _inactivity_count++;
     }
 }

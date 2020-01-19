@@ -20,7 +20,7 @@ uint8_t accelerometer_activity_count(void) {
 }
 
 uint8_t accelerometer_inactivity_count(void) {
-    return adxl345_activity_count();
+    return adxl345_inactivity_count();
 }
 
 void accelerometer_print_axis_data(void) {
