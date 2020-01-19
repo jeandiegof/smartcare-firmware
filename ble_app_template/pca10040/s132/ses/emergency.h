@@ -33,3 +33,4 @@ typedef struct {
 uint32_t ble_emergency_init(ble_emergency_service_t *service,
                             const ble_emergency_service_init_t *init);
 void on_ble_emergency_evt(ble_evt_t const *p_ble_evt, void *p_context);
+uint32_t ble_emergency_status_update(ble_emergency_service_t *p_service, uint8_t value);

@@ -13,3 +13,6 @@ ble_gatts_attr_md_t get_attribute_metadata(ble_gap_conn_sec_mode_t read_permissi
                                            ble_gap_conn_sec_mode_t write_permission);
 ble_uuid_t get_ble_uuid_structure(uint8_t type, uint16_t uuid);
 ble_gatts_attr_t get_u8_attribute_structure(ble_uuid_t* ble_uuid, ble_gatts_attr_md_t* attr_md);
+ble_gatts_value_t get_gatts_value_structure(uint8_t *value, uint8_t size);
+uint32_t notify_value(uint16_t connection_handle, uint16_t value_handle, ble_gatts_value_t* gatts_value);
+bool is_connected(uint16_t handle);

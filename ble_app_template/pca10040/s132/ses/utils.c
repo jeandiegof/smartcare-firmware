@@ -35,7 +35,7 @@ ble_gatts_char_md_t get_characteristic_metadata(ble_gatts_attr_md_t* cccd_md, bo
     char_md.p_char_user_desc = NULL;
     char_md.p_char_pf = NULL;
     char_md.p_user_desc_md = NULL;
-    char_md.p_cccd_md = cccd_md;
+    char_md.p_cccd_md = (notify) ? cccd_md : NULL;
     char_md.p_sccd_md = NULL;
 
     return char_md;
@@ -71,4 +71,30 @@ ble_gatts_attr_t get_u8_attribute_structure(ble_uuid_t* ble_uuid, ble_gatts_attr
     attr_char_value.max_len = sizeof(uint8_t);
 
     return attr_char_value;
+}
+
+ble_gatts_value_t get_gatts_value_structure(uint8_t *value, uint8_t size) {
+    ble_gatts_value_t gatts_value = {0};
+
+    gatts_value.len = size;
+    gatts_value.offset = 0;
+    gatts_value.p_value = value;
+
+    return gatts_value;
+}
+
+uint32_t notify_value(uint16_t connection_handle, uint16_t value_handle, ble_gatts_value_t* gatts_value) {
+    ble_gatts_hvx_params_t hvx_params = {0};
+
+    hvx_params.handle = value_handle;
+    hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
+    hvx_params.offset = gatts_value->offset;
+    hvx_params.p_len = &gatts_value->len;
+    hvx_params.p_data = gatts_value->p_value;
+
+    return sd_ble_gatts_hvx(connection_handle, &hvx_params);
+}
+
+bool is_connected(uint16_t handle) {
+    return handle != BLE_CONN_HANDLE_INVALID;
 }
