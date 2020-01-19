@@ -7,10 +7,20 @@ void accelerometer_start(void) {
     adxl345_init();
     adxl345_setup();
     adxl345_start_free_fall_mode();
+    adxl345_start_activity_detection_mode();
+    adxl345_start_inactivity_detection_mode();
 }
 
 uint8_t accelerometer_fall_count(void) {
     return adxl345_fall_count();
+}
+
+uint8_t accelerometer_activity_count(void) {
+    return adxl345_activity_count();
+}
+
+uint8_t accelerometer_inactivity_count(void) {
+    return adxl345_inactivity_count();
 }
 
 void accelerometer_print_axis_data(void) {
