@@ -24,18 +24,17 @@ ble_gatts_attr_md_t get_characteristic_configuration_descriptor_metadata(void) {
     return cccd_md;
 }
 
-ble_gatts_char_md_t get_characteristic_metadata(ble_gatts_attr_md_t* cccd_md, bool read, bool write,
-                                                bool notify) {
+ble_gatts_char_md_t get_characteristic_metadata(ble_gatts_attr_md_t* cccd_md, uint8_t properties) {
     ble_gatts_char_md_t char_md;
 
     memset(&char_md, 0, sizeof(char_md));
-    char_md.char_props.read = read;
-    char_md.char_props.write = write;
-    char_md.char_props.notify = notify;
+    char_md.char_props.read = (properties & Read) ? true : false;
+    char_md.char_props.write = (properties & Write) ? true : false;
+    char_md.char_props.notify = (properties & Notify) ? true : false;
     char_md.p_char_user_desc = NULL;
     char_md.p_char_pf = NULL;
     char_md.p_user_desc_md = NULL;
-    char_md.p_cccd_md = (notify) ? cccd_md : NULL;
+    char_md.p_cccd_md = (properties & Notify) ? cccd_md : NULL;
     char_md.p_sccd_md = NULL;
 
     return char_md;

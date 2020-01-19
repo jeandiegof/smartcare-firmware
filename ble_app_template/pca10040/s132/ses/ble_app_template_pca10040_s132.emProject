@@ -147,6 +147,8 @@
             <file file_name="emergency_chars.c" />
             <file file_name="emergency_chars.h" />
           </folder>
+          <file file_name="services.h" />
+          <file file_name="services.c" />
         </folder>
         <folder Name="utils">
           <file file_name="utils.c" />
