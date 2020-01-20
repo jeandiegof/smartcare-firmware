@@ -3,8 +3,8 @@
 
 #include "app_error.h"
 #include "nrf.h"
-#include "nrf_delay.h"
 #include "nrf_assert.h"
+#include "nrf_delay.h"
 #include "nrf_drv_twi.h"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -133,19 +133,17 @@ static void set_leds_current(uint8_t red_current, uint8_t ir_current,
     twi_write_data(_twi, MAX30101_ADDRESS, green1_data, sizeof(green1_data));
 
     const uint8_t green2_data[2] = {LED3_PULSE_AMPLITUDE,
-                                   current_ma_to_register(green2_current)};
+                                    current_ma_to_register(green2_current)};
     twi_write_data(_twi, MAX30101_ADDRESS, green2_data, sizeof(green2_data));
 }
 
 static void set_leds_slots(uint8_t slot1, uint8_t slot2, uint8_t slot3,
                            uint8_t slot4) {
-    const uint8_t data_register1[2] = {MULTI_LED_MODE_1,
-                                       slot2 << 4 | slot1};
+    const uint8_t data_register1[2] = {MULTI_LED_MODE_1, slot2 << 4 | slot1};
     twi_write_data(_twi, MAX30101_ADDRESS, data_register1,
                    sizeof(data_register1));
 
-    const uint8_t data_register2[2] = {MULTI_LED_MODE_2,
-                                       slot4 << 4 | slot3};
+    const uint8_t data_register2[2] = {MULTI_LED_MODE_2, slot4 << 4 | slot3};
     twi_write_data(_twi, MAX30101_ADDRESS, data_register2,
                    sizeof(data_register2));
 }
@@ -169,10 +167,12 @@ static void set_adc_range(ADCRange adc_range) {
 }
 
 uint32_t read_hr_sample(void) {
-    // This depends on the number of slots configured. For 1 led in the first slot, we'll read 3 bytes
+    // This depends on the number of slots configured. For 1 led in the first
+    // slot, we'll read 3 bytes
     uint8_t read_data[3] = {0};
-    twi_read_data(_twi, MAX30101_ADDRESS, FIFO_DATA_REGISTER, read_data, sizeof(read_data));
-    (val[3]<<16 | val[4]<<8 | val[5])
+    twi_read_data(_twi, MAX30101_ADDRESS, FIFO_DATA_REGISTER, read_data,
+                  sizeof(read_data));
+    return (read_data[0] << 16 | read_data[1] << 8 | read_data[2]);
 }
 
 void setup(void) {
@@ -181,8 +181,8 @@ void setup(void) {
     set_mode(MULTI_LED);
     nrf_delay_ms(50);
     set_leds_current(
-        0, 0,
-        51, 51);  // Max value for led current = 51 mA (TODO: clip this value).
+        0, 0, 51,
+        51);  // Max value for led current = 51 mA (TODO: clip this value).
     set_leds_slots(0b011, 0, 0, 0);  // 0x011 -> green. Datasheet Pag. 22.
     set_sampling_rate(MAX30101_SR_100);
     set_pulse_width(MAX3010_LED_PW_411);
