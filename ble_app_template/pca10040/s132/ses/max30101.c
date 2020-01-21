@@ -19,6 +19,8 @@ static uint8_t current_ma_to_register(uint8_t current_ma) {
     return register_value > 0x00ff ? 0xff : register_value;
 }
 
+#define PPG_RDY 0b01000000
+
 // Mode configurations
 #define MODE_SHDN 0b10000000
 #define MODE_RESET 0b01000000
@@ -166,25 +168,49 @@ static void set_adc_range(ADCRange adc_range) {
                    sizeof(data_register));
 }
 
+static void setup_interruption(void) {
+    const uint8_t data_register[2] = {INTERRUPT_ENABLE_1, PPG_RDY};
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register,
+                   sizeof(data_register));
+}
+
+void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
+    extern uint8_t max30101_interrupt_count;
+    max30101_interrupt_count++;
+}
+
 uint32_t read_hr_sample(void) {
     // This depends on the number of slots configured. For 1 led in the first
     // slot, we'll read 3 bytes
-    uint8_t read_data[3] = {0};
+    uint8_t read_data[6] = {0};
     twi_read_data(_twi, MAX30101_ADDRESS, FIFO_DATA_REGISTER, read_data,
                   sizeof(read_data));
-    return (read_data[0] << 16 | read_data[1] << 8 | read_data[2]);
+    return (read_data[3] << 16 | read_data[4] << 8 | read_data[5]);
 }
 
-void setup(void) {
+void wait_for_heart_rate_sample(void) {
+    uint8_t read_data[1] = {0};
+    do {
+        twi_read_data(_twi, MAX30101_ADDRESS, INTERRUPT_STATUS_1, read_data,
+                      sizeof(read_data));
+        nrf_delay_ms(5);
+    } while (!(read_data[0] & PPG_RDY));
+}
+
+void heart_rate_start(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
+    enable_gpio_interrupt(INT_PIN, &on_int_interrupt,
+                          NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
+
     ASSERT(reset());
-    set_mode(MULTI_LED);
     nrf_delay_ms(50);
     set_leds_current(
-        0, 0, 51,
-        51);  // Max value for led current = 51 mA (TODO: clip this value).
+        0, 0, 100,
+        100);  // Max value for led current = 51 mA (TODO: clip this value).
     set_leds_slots(0b011, 0, 0, 0);  // 0x011 -> green. Datasheet Pag. 22.
-    set_sampling_rate(MAX30101_SR_100);
+    set_sampling_rate(MAX30101_SR_50);
     set_pulse_width(MAX3010_LED_PW_411);
     set_adc_range(MAX30101_RANGE16384);
+    setup_interruption();
+    set_mode(MULTI_LED);
 }
