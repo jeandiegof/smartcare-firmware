@@ -57,9 +57,9 @@ static const nrf_drv_twi_t *_twi;
 
 // local variables
 static bool _is_interrupt_available = false;
-static uint8_t _fall_count = 0;
-static uint8_t _activity_count = 0;
-static uint8_t _inactivity_count = 0;
+static bool _free_fall = false;
+static bool _activity = false;
+static bool _inactivity = false;
 static uint8_t m_samples[6] = {0};
 
 // local functions
@@ -113,16 +113,28 @@ const uint8_t *adxl345_request_axis_data(void) {
     return m_samples;
 }
 
-uint8_t adxl345_fall_count(void) {
-    return _fall_count;
+uint8_t adxl345_free_fall(void) {
+    return _free_fall;
 }
 
-uint8_t adxl345_activity_count(void) {
-    return _activity_count;
+void adxl345_clear_free_fall(void) {
+    _free_fall = false;
 }
 
-uint8_t adxl345_inactivity_count(void) {
-    return _inactivity_count;
+uint8_t adxl345_activity(void) {
+    return _activity;
+}
+
+void adxl345_clear_activity(void) {
+    _activity = false;
+}
+
+uint8_t adxl345_inactivity(void) {
+    return _inactivity;
+}
+
+void adxl345_clear_inactivity(void) {
+    _inactivity = false;
 }
 
 bool adxl345_is_interrupt_available(void) {
@@ -134,13 +146,13 @@ void adxl345_handle_interrupts() {
     clear_available_interrupts();
 
     if (interrupt_source & 0b00000100) {
-        _fall_count++;
+        _free_fall = true;
     }
     if (interrupt_source & 0b00010000) {
-        _activity_count++;
+        _activity = true;
     }
     if (interrupt_source & 0b00001000) {
-        _inactivity_count++;
+        _inactivity = true;
     }
 }
 

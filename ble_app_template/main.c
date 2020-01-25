@@ -86,6 +86,7 @@
 #include "pca10040/s132/ses/accelerometer.h"
 #include "pca10040/s132/ses/heart_rate.h"
 #include "pca10040/s132/ses/gpio.h"
+#include "pca10040/s132/ses/fall_detection.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
@@ -738,11 +739,9 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
-        if (is_interrupt_available()) {
-            handle_interrupts();
-            NRF_LOG_INFO("\r\nFalls: %d, Activity: %d, Inactivity: %d",
-                accelerometer_fall_count(), accelerometer_activity_count(), accelerometer_inactivity_count()
-            );
+        update_fall_detector_state();
+        if (fall_detected()) {
+            NRF_LOG_INFO("\r\nFall Detected!);
         }
 
         NRF_LOG_FLUSH();

@@ -133,6 +133,10 @@
           <file file_name="gpio.h" />
         </folder>
       </folder>
+      <folder Name="fall_detection">
+        <file file_name="fall_detection.c" />
+        <file file_name="fall_detection.h" />
+      </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="$(SDK)/external/segger_rtt/SEGGER_RTT.c" />

@@ -11,16 +11,28 @@ void accelerometer_start(void) {
     adxl345_start_inactivity_detection_mode();
 }
 
-uint8_t accelerometer_fall_count(void) {
-    return adxl345_fall_count();
+uint8_t accelerometer_free_fall(void) {
+    return adxl345_free_fall();
 }
 
-uint8_t accelerometer_activity_count(void) {
-    return adxl345_activity_count();
+void clear_accelerometer_free_fall(void) {
+    adxl345_clear_free_fall();
 }
 
-uint8_t accelerometer_inactivity_count(void) {
-    return adxl345_inactivity_count();
+uint8_t accelerometer_activity(void) {
+    return adxl345_activity();
+}
+
+void clear_accelerometer_activity() {
+    adxl345_clear_activity();
+}
+
+uint8_t accelerometer_inactivity(void) {
+    return adxl345_inactivity();
+}
+
+void clear_accelerometer_inactivity(void) {
+    adxl345_clear_inactivity();
 }
 
 bool is_interrupt_available(void) {
