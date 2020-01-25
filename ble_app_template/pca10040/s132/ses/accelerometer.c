@@ -36,7 +36,9 @@ void accelerometer_print_axis_data(void) {
 }
 
 void handle_accelerometer_interruption(void) {
-    NRF_LOG_DEBUG("It reads which type of event has generated the interruption and runs its internal state machine.");
+    NRF_LOG_DEBUG(
+        "It reads which type of event has generated the interruption and runs "
+        "its internal state machine.");
 
     adxl345_handle_interrupt();
 
