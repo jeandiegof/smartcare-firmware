@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
-void heart_rate_start(void);
+void max30101_init(void);
+void max30101_setup(void);
 void wait_for_heart_rate_sample(void);
 uint32_t read_hr_sample(void);

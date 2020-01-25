@@ -197,11 +197,7 @@ void wait_for_heart_rate_sample(void) {
     } while (!(read_data[0] & PPG_RDY));
 }
 
-void heart_rate_start(void) {
-    _twi = twi_init(SCL_PIN, SDA_PIN);
-    enable_gpio_interrupt(INT_PIN, &on_int_interrupt,
-                          NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
-
+void max30101_setup(void) {
     ASSERT(reset());
     nrf_delay_ms(50);
     set_leds_current(
@@ -213,4 +209,10 @@ void heart_rate_start(void) {
     set_adc_range(MAX30101_RANGE16384);
     setup_interruption();
     set_mode(MULTI_LED);
+}
+
+void max30101_init(void) {
+    _twi = twi_init(SCL_PIN, SDA_PIN);
+    enable_gpio_interrupt(INT_PIN, &on_int_interrupt,
+                          NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
 }
