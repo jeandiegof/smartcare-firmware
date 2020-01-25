@@ -1,4 +1,5 @@
 #include "accelerometer.h"
+#include "fall_detector.h"
 #include "adxl345.h"
 
 #include "nrf_log.h"
@@ -11,13 +12,17 @@ void accelerometer_start(void) {
     adxl345_start_inactivity_detection_mode();
 }
 
-uint8_t accelerometer_fall_count(void) { return adxl345_fall_count(); }
+uint8_t accelerometer_free_fall(void) { return adxl345_free_fall(); }
 
-uint8_t accelerometer_activity_count(void) { return adxl345_activity_count(); }
+void clear_accelerometer_free_fall(void) { adxl345_clear_free_fall(); }
 
-uint8_t accelerometer_inactivity_count(void) {
-    return adxl345_inactivity_count();
-}
+uint8_t accelerometer_activity(void) { return adxl345_activity(); }
+
+void clear_accelerometer_activity(void) { adxl345_clear_activity(); }
+
+uint8_t accelerometer_inactivity(void) { return adxl345_inactivity(); }
+
+void clear_accelerometer_inactivity(void) { adxl345_clear_inactivity(); }
 
 void accelerometer_print_axis_data(void) {
     const uint8_t* samples = adxl345_request_axis_data();
@@ -41,8 +46,10 @@ void handle_accelerometer_interruption(void) {
         "its internal state machine.");
 
     adxl345_handle_interrupt();
+    update_fall_detector_state();
 
-    NRF_LOG_INFO("\r\nFalls: %d", accelerometer_fall_count());
-    NRF_LOG_INFO("\r\nActivity: %d", accelerometer_activity_count());
-    NRF_LOG_INFO("\r\nInactivity: %d", accelerometer_inactivity_count());
+    if (fall_detected()) {
+        NRF_LOG_INFO("\r\nFall Detected!");
+        clear_fall_detected();
+    }
 }
