@@ -11,3 +11,4 @@ void adxl345_start_inactivity_detection_mode(void);
 uint8_t adxl345_fall_count(void);
 uint8_t adxl345_activity_count(void);
 uint8_t adxl345_inactivity_count(void);
+void adxl345_handle_interrupt(void);

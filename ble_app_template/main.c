@@ -85,6 +85,7 @@
 
 #include "pca10040/s132/ses/accelerometer.h"
 #include "pca10040/s132/ses/heart_rate.h"
+#include "pca10040/s132/ses/events.h"
 #include "pca10040/s132/ses/gpio.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
@@ -703,8 +704,6 @@ static void advertising_start(bool erase_bonds)
     }
 }
 
-uint8_t max30101_interrupt_count = 0;
-
 /**@brief Function for application main entry.
  */
 int main(void)
@@ -737,18 +736,9 @@ int main(void)
     heart_rate_start();
 
     // Enter main loop.
-    for (;;)
-    {
-        NRF_LOG_INFO("\r\nFalls: %d", accelerometer_fall_count());
-        NRF_LOG_INFO("\r\nActivity: %d", accelerometer_activity_count());
-        NRF_LOG_INFO("\r\nInactivity: %d", accelerometer_inactivity_count());
-
-        //// Busy-waiting example for reading heart-rate
-        /* wait_for_heart_rate_sample();
-        NRF_LOG_INFO("%d", read_hr_sample()); */
-        //// Event based example for reading heart-rate
-       NRF_LOG_INFO("max30101_interrupt_count %d", max30101_interrupt_count);
-
+    for (;;) {
+        consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
+        consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
         NRF_LOG_FLUSH();
         nrf_delay_ms(10);
         idle_state_handle();

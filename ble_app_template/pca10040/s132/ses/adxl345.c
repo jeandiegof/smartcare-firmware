@@ -1,4 +1,5 @@
 #include "adxl345.h"
+#include "events.h"
 #include "twi.h"
 #include "gpio.h"
 
@@ -222,6 +223,10 @@ static void clear_interrupts(void) {
 }
 
 void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
+    set_event(AccelerometerInterruptionEvt);
+}
+
+void adxl345_handle_interrupt(void) {
     _interrupt_count++;
 
     uint8_t interrupt_source = 0;

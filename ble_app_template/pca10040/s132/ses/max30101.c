@@ -1,4 +1,5 @@
 #include "max30101.h"
+#include "events.h"
 #include "gpio.h"
 
 #include "app_error.h"
@@ -175,8 +176,7 @@ static void setup_interruption(void) {
 }
 
 void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
-    extern uint8_t max30101_interrupt_count;
-    max30101_interrupt_count++;
+    set_event(HeartrateInterruptionEvt);
 }
 
 uint32_t read_hr_sample(void) {
