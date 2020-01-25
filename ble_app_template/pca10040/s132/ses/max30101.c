@@ -176,7 +176,7 @@ static void setup_interruption(void) {
 }
 
 void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
-    set_event(HeartrateInterruptionEvt );
+    set_event(HeartrateInterruptionEvt);
 }
 
 uint32_t read_hr_sample(void) {
