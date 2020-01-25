@@ -133,6 +133,8 @@
           <file file_name="gpio.h" />
         </folder>
       </folder>
+      <file file_name="events.c" />
+      <file file_name="events.h" />
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="$(SDK)/external/segger_rtt/SEGGER_RTT.c" />
