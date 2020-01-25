@@ -84,7 +84,7 @@
 #include "nrf_delay.h"
 
 #include "pca10040/s132/ses/accelerometer.h"
-#include "pca10040/s132/ses/max30101.h"
+#include "pca10040/s132/ses/heart_rate.h"
 #include "pca10040/s132/ses/gpio.h"
 
 #define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */

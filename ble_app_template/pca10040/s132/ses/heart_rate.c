@@ -1,5 +1,5 @@
 #include "heart_rate.h"
-#ifdef MAX301000
+#ifdef MAX30100
 #include "max30100.h"
 #else
 #include "max30101.h"
