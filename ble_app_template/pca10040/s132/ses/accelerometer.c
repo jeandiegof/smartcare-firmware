@@ -14,15 +14,15 @@ void accelerometer_start(void) {
 
 uint8_t accelerometer_free_fall(void) { return adxl345_free_fall(); }
 
-void clear_accelerometer_free_fall(void) { adxl345_clear_free_fall(); }
-
 uint8_t accelerometer_activity(void) { return adxl345_activity(); }
-
-void clear_accelerometer_activity(void) { adxl345_clear_activity(); }
 
 uint8_t accelerometer_inactivity(void) { return adxl345_inactivity(); }
 
-void clear_accelerometer_inactivity(void) { adxl345_clear_inactivity(); }
+void clear_accelerometer_flags(void) {
+    adxl345_clear_free_fall();
+    adxl345_clear_activity();
+    adxl345_clear_inactivity();
+}
 
 void accelerometer_print_axis_data(void) {
     const uint8_t* samples = adxl345_request_axis_data();
