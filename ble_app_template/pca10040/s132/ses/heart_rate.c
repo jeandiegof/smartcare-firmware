@@ -1,5 +1,5 @@
-#include "nrf_log.h"
 #include "heart_rate.h"
+#include "nrf_log.h"
 #ifdef MAX30100
 #include "max30100.h"
 #else
@@ -17,6 +17,12 @@ void heart_rate_start(void) {
     max30101_setup();
 #endif
 }
+
+typedef enum {
+    Idle,
+} PulseDetectorState;
+
+static PulseDetectorState _pulse_detector_state = Idle;
 
 static float high_pass_filter(float sample) {
     static float _previous_sample = 0.0;
@@ -40,13 +46,10 @@ static float butterworth_filter(float sample) {
 static void process_new_sample(uint32_t sample) {
     float filtered_sample = high_pass_filter((float)sample);
     filtered_sample = butterworth_filter(filtered_sample);
-
-
 }
 
 void handle_heart_rate_interruption(void) {
     const uint32_t sample = read_hr_sample();
     NRF_LOG_DEBUG("It processes the sample signal to get bpm's.");
     process_new_sample(sample);
-
 }
