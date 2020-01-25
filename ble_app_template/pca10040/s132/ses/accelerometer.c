@@ -25,7 +25,7 @@ uint8_t accelerometer_inactivity_count(void) {
 
 void accelerometer_print_axis_data(void) {
     const uint8_t * samples = adxl345_request_axis_data();
-    
+
     int16_t data_packed[3] = {
         (int16_t)(((uint16_t)samples[1] << 8) | samples[0]),
         (int16_t)(((uint16_t)samples[3] << 8) | samples[2]),

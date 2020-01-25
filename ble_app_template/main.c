@@ -703,6 +703,7 @@ static void advertising_start(bool erase_bonds)
     }
 }
 
+uint8_t max30101_interrupt_count = 0;
 
 /**@brief Function for application main entry.
  */
@@ -742,8 +743,14 @@ int main(void)
         NRF_LOG_INFO("\r\nActivity: %d", accelerometer_activity_count());
         NRF_LOG_INFO("\r\nInactivity: %d", accelerometer_inactivity_count());
 
+        //// Busy-waiting example for reading heart-rate
+        /* wait_for_heart_rate_sample();
+        NRF_LOG_INFO("%d", read_hr_sample()); */
+        //// Event based example for reading heart-rate
+       NRF_LOG_INFO("max30101_interrupt_count %d", max30101_interrupt_count);
+
         NRF_LOG_FLUSH();
-        nrf_delay_ms(300);
+        nrf_delay_ms(10);
         idle_state_handle();
     }
 }

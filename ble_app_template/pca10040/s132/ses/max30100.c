@@ -201,7 +201,7 @@ static void enable_interrupts(uint8_t interrupts) {
     twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_ENABLE, &current_enabled_interrupts, sizeof(current_enabled_interrupts));
 
     const uint8_t interrupt_enable[] = {
-        INTERRUPT_ENABLE, 
+        INTERRUPT_ENABLE,
         current_enabled_interrupts | interrupts
     };
     twi_write_data(_twi, MAX30100_ADDRESS, interrupt_enable, sizeof(interrupt_enable));
@@ -212,7 +212,7 @@ static void disable_interrupts(uint8_t interrupts) {
     twi_read_data(_twi, MAX30100_ADDRESS, INTERRUPT_ENABLE, &current_disabled_interrupts, sizeof(current_disabled_interrupts));
 
     const uint8_t interrupt_enable[] = {
-        INTERRUPT_ENABLE, 
+        INTERRUPT_ENABLE,
         current_disabled_interrupts & (~interrupts)
     };
     twi_write_data(_twi, MAX30100_ADDRESS, interrupt_enable, sizeof(interrupt_enable));
