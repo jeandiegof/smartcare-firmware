@@ -153,12 +153,6 @@
           </folder>
           <file file_name="services.h" />
           <file file_name="services.c" />
-          <folder Name="accelerometer">
-            <file file_name="ble_accelerometer.c" />
-            <file file_name="ble_accelerometer.h" />
-            <file file_name="accelerometer_chars.h" />
-            <file file_name="accelerometer_chars.c" />
-          </folder>
         </folder>
         <folder Name="utils">
           <file file_name="utils.c" />
