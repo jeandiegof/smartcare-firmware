@@ -128,7 +128,7 @@ static void on_gpio_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t ac
 // public interface
 void max30100_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
-    enable_gpio_interrupt(INT_PIN, &on_gpio_interrupt, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
+    APP_ERROR_CHECK(enable_gpio_interrupt(INT_PIN, &on_gpio_interrupt, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP));
 }
 
 void max30100_setup(void) {

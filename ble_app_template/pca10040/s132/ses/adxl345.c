@@ -79,7 +79,7 @@ static void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t ac
 
 void adxl345_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
-    enable_gpio_interrupt(INT1_PIN, &on_int1_interrupt, NRF_GPIOTE_POLARITY_LOTOHI, NRF_GPIO_PIN_PULLUP);
+    APP_ERROR_CHECK(enable_gpio_interrupt(INT1_PIN, &on_int1_interrupt, NRF_GPIOTE_POLARITY_LOTOHI, NRF_GPIO_PIN_PULLUP));
 }
 
 void adxl345_setup(void) {

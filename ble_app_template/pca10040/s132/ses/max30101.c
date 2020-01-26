@@ -213,6 +213,6 @@ void max30101_setup(void) {
 
 void max30101_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
-    enable_gpio_interrupt(INT_PIN, &on_int_interrupt,
-                          NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
+    APP_ERROR_CHECK(enable_gpio_interrupt(INT_PIN, &on_int_interrupt,
+                          NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP));
 }

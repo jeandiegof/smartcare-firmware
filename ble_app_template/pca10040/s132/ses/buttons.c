@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 enum ButtonPin {
-    LeftButtonPin = 31, 
+    LeftButtonPin = 31,
     RightButtonPin = 14,
 };
 typedef uint8_t ButtonPin;
@@ -31,6 +31,6 @@ void handle_right_button_interruption(void) {
 }
 
 void buttons_start(void) {
-    enable_gpio_interrupt(LeftButtonPin, left_button_callback, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
-    enable_gpio_interrupt(RightButtonPin, right_button_callback, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP);
+    APP_ERROR_CHECK(enable_gpio_interrupt(LeftButtonPin, left_button_callback, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP));
+    APP_ERROR_CHECK(enable_gpio_interrupt(RightButtonPin, right_button_callback, NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP));
 }
