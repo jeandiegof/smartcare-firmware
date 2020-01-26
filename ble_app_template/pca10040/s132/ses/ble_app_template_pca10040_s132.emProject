@@ -139,10 +139,6 @@
       </folder>
       <file file_name="events.c" />
       <file file_name="events.h" />
-      <folder Name="characteristics">
-        <file file_name="ble_custom.h" />
-        <file file_name="ble_custom.c" />
-      </folder>
       <folder Name="ble">
         <folder Name="services">
           <folder Name="base_service">
