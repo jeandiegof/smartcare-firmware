@@ -1,5 +1,5 @@
 #include "services.h"
-#include "emergency.h"
+#include "base_service.h"
 #include "ble_accelerometer.h"
 
 #include "nrf_sdh_ble.h"
@@ -7,17 +7,17 @@
 
 #include <string.h>
 
-BLE_EMERGENCY_DEF(_emergency_service);
+BLE_BASE_SERVICE_DEF(_base_service);
 BLE_ACCELEROMETER_DEF(_accelerometer_service);
 
-static uint32_t init_emergency_service(void) {
-    ble_emergency_service_init_t emergency_init;
+static uint32_t init_base_service(void) {
+    ble_base_service_init_t base_init;
 
-    memset(&emergency_init, 0, sizeof(emergency_init));
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&emergency_init.emergency_status_char_attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&emergency_init.emergency_status_char_attr_md.write_perm);
+    memset(&base_init, 0, sizeof(base_init));
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&base_init.base_status_char_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&base_init.base_status_char_attr_md.write_perm);
 
-    uint32_t err_code = ble_emergency_init(&_emergency_service, &emergency_init);
+    uint32_t err_code = ble_base_service_init(&_base_service, &base_init);
     return err_code;
 }
 
@@ -33,7 +33,13 @@ static uint32_t init_accelerometer_service(void) {
 }
 
 uint32_t init_smartcare_services(void) { 
-    VERIFY_SUCCESS(init_emergency_service());
-    VERIFY_SUCCESS(init_accelerometer_service());
+    VERIFY_SUCCESS(init_base_service());
+    // TODO: for some reason, adding another service was causing a memory error.
+    // I've just put everything in the same service for now. We need to fix this.
+    // VERIFY_SUCCESS(init_accelerometer_service());
     return NRF_SUCCESS; 
+}
+
+uint32_t notify_emergency(uint8_t value) {
+    return ble_base_service_button_update(&_base_service, value);
 }

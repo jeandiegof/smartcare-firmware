@@ -145,11 +145,11 @@
       </folder>
       <folder Name="ble">
         <folder Name="services">
-          <folder Name="emergency">
-            <file file_name="emergency.c" />
-            <file file_name="emergency.h" />
-            <file file_name="emergency_chars.c" />
-            <file file_name="emergency_chars.h" />
+          <folder Name="base_service">
+            <file file_name="base_service.c" />
+            <file file_name="base_service.h" />
+            <file file_name="base_service_chars.c" />
+            <file file_name="base_service_chars.h" />
           </folder>
           <file file_name="services.h" />
           <file file_name="services.c" />

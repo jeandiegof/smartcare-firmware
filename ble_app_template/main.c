@@ -88,7 +88,7 @@
 #include "pca10040/s132/ses/events.h"
 #include "pca10040/s132/ses/gpio.h"
 #include "pca10040/s132/ses/ble_custom.h"
-#include "pca10040/s132/ses/emergency.h"
+#include "pca10040/s132/ses/base_service.h"
 #include "pca10040/s132/ses/services.h"
 
 #define DEVICE_NAME "Nordic_Template"           /**< Name of device. Will be included in the advertising data. */
