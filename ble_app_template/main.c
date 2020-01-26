@@ -85,6 +85,7 @@
 
 #include "pca10040/s132/ses/accelerometer.h"
 #include "pca10040/s132/ses/heart_rate.h"
+#include "pca10040/s132/ses/buttons.h"
 #include "pca10040/s132/ses/events.h"
 #include "pca10040/s132/ses/gpio.h"
 #include "pca10040/s132/ses/ble_custom.h"
@@ -732,11 +733,14 @@ int main(void)
 
     accelerometer_start();
     heart_rate_start();
+    buttons_start();
 
     // Enter main loop.
     for (;;) {
         consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
         consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
+        consume_event(LeftButtonInterruptionEvt, handle_left_button_interruption);
+        consume_event(RightButtonInterruptionEvt, handle_right_button_interruption);
         NRF_LOG_FLUSH();
         nrf_delay_ms(10);
         idle_state_handle();
