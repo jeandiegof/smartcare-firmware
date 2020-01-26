@@ -99,7 +99,11 @@
       <file file_name="$(SDK)/components/libraries/bsp/bsp_btn_ble.c" />
     </folder>
     <folder Name="Application">
-      <file file_name="../../../main.c" />
+      <file file_name="../../../main.c">
+        <configuration
+          Name="Release"
+          c_user_include_directories=".;$(ProjectDir)" />
+      </file>
       <file file_name="../config/sdk_config.h" />
       <folder Name="accelerometer">
         <folder Name="adxl345">
@@ -149,6 +153,12 @@
           </folder>
           <file file_name="services.h" />
           <file file_name="services.c" />
+          <folder Name="accelerometer">
+            <file file_name="ble_accelerometer.c" />
+            <file file_name="ble_accelerometer.h" />
+            <file file_name="accelerometer_chars.h" />
+            <file file_name="accelerometer_chars.c" />
+          </folder>
         </folder>
         <folder Name="utils">
           <file file_name="utils.c" />
