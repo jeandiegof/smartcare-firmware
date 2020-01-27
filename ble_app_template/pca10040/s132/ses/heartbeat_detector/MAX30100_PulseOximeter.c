@@ -32,19 +32,19 @@ bool pulseOxBegin(PulseOximeterDebuggingMode debuggingMode_)
     return true;
 }
 
-void pulseOxCheckSample()
-{
-	uint16_t rawIRValue, rawRedValue;
-	float irACValue, redACValue, filteredPulseValue;
-	bool beatDetected; 
+// void pulseOxCheckSample()
+// {
+// 	uint16_t rawIRValue, rawRedValue;
+// 	float irACValue, redACValue, filteredPulseValue;
+// 	bool beatDetected;
 
-	// Dequeue all available samples
-	while(getRawValues(&rawIRValue, &rawRedValue))
-	{
-        irACValue = dcStepIr(rawIRValue);
-        redACValue = dcStepRed(rawRedValue);
+// 	// Dequeue all available samples
+// 	while(getRawValues(&rawIRValue, &rawRedValue))
+// 	{
+//         irACValue = dcStepIr(rawIRValue);
+//         redACValue = dcStepRed(rawRedValue);
 
-        filteredPulseValue = butterworthStep(-irACValue);
+//         filteredPulseValue = butterworthStep(-irACValue);
 		beatDetected = beatDetectorAddSample(filteredPulseValue);
 
 		if (beatDetectorGetRate() > 0) {
@@ -71,7 +71,7 @@ void pulseOxCheckSample()
                 sendData('\t');
                 sendString("Rac: ");
                 sendFloat(redACValue);
-                sendData('\n');     
+                sendData('\n');
                 break;
 
             case PULSEOXIMETER_DEBUGGINGMODE_PULSEDETECT:
@@ -100,7 +100,7 @@ void pulseOxCheckSample()
                         break;
                     default:
                         sendString("ERR");
-                        break; 
+                        break;
                 }
                 sendData('\n');
                 break;
@@ -116,9 +116,9 @@ void pulseOxCheckSample()
 
         if (beatDetected && onBeatDetected) {
             onBeatDetected();
-        }        
-	}
-}
+        }
+// 	}
+// }
 
 void pulseOxCheckCurrentBias()
 {
@@ -154,7 +154,7 @@ void pulseOxCheckCurrentBias()
 
 void pulseOxUpdate()
 {
-    update();
+    // update(); read sample
 
     pulseOxCheckSample();
     pulseOxCheckCurrentBias();
