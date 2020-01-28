@@ -736,13 +736,11 @@ int main(void)
     heart_rate_start();
     buttons_start();
 
-    // Enter main loop.
     for (;;) {
-        wait_for_heart_rate_sample();
-        NRF_LOG_INFO("%d", read_hr_sample());
+        extern int max30101_interrupt_count;
+        NRF_LOG_INFO("max30101_interrupt_count %d", max30101_interrupt_count);
 
-
-        consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
+//        consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
         consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
         consume_event(LeftButtonInterruptionEvt, handle_left_button_interruption);
         consume_event(RightButtonInterruptionEvt, handle_right_button_interruption);

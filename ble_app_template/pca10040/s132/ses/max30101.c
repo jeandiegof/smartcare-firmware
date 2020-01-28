@@ -209,6 +209,9 @@ void max30101_setup(void) {
     set_adc_range(MAX30101_RANGE16384);
     setup_interruption();
     set_mode(MULTI_LED);
+
+    wait_for_heart_rate_sample();
+    NRF_LOG_INFO("%d", read_hr_sample());
 }
 
 void max30101_init(void) {
