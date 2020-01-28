@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 
-static Events _events = NULL;
+Events _events = NULL;
 
 inline void set_event(Event event) { _events |= event; }
 
