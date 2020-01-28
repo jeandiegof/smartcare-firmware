@@ -732,12 +732,16 @@ int main(void)
 
     advertising_start(erase_bonds);
 
-    accelerometer_start();
+//    accelerometer_start();
     heart_rate_start();
     buttons_start();
 
     // Enter main loop.
     for (;;) {
+        wait_for_heart_rate_sample();
+        NRF_LOG_INFO("%d", read_hr_sample());
+
+
         consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
         consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
         consume_event(LeftButtonInterruptionEvt, handle_left_button_interruption);
