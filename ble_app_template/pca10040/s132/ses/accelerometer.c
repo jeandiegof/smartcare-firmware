@@ -1,5 +1,6 @@
 #include "accelerometer.h"
 #include "fall_detector.h"
+#include "services.h"
 #include "adxl345.h"
 
 #include "nrf_log.h"
@@ -50,6 +51,7 @@ void handle_accelerometer_interruption(void) {
 
     if (fall_detected()) {
         NRF_LOG_INFO("\r\nFall Detected!");
+        notify_fall_detection(true);
         clear_fall_detected();
     }
 }
