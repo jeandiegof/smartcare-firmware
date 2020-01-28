@@ -93,6 +93,7 @@
       <file file_name="$(SDK)/integration/nrfx/legacy/nrf_drv_twi.c" />
       <file file_name="$(SDK)/modules/nrfx/drivers/src/nrfx_twi.c" />
       <file file_name="$(SDK)/modules/nrfx/drivers/src/nrfx_twim.c" />
+      <file file_name="$(SDK)/modules/nrfx/drivers/src/nrfx_systick.c" />
     </folder>
     <folder Name="Board Support">
       <file file_name="$(SDK)/components/libraries/bsp/bsp.c" />

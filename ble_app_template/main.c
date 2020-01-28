@@ -82,6 +82,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_delay.h"
+#include "nrf_drv_systick.h"
 
 #include "pca10040/s132/ses/accelerometer.h"
 #include "pca10040/s132/ses/heart_rate.h"
@@ -724,6 +725,7 @@ int main(void)
 
     // SmartCare Initialization.
     gpio_init();
+    nrf_drv_systick_init();
 
     // Start execution.
     NRF_LOG_INFO("Template example started.");
