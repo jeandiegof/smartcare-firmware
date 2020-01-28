@@ -82,12 +82,13 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_delay.h"
+#include "nrf_drv_systick.h"
 
 #include "pca10040/s132/ses/accelerometer.h"
 #include "pca10040/s132/ses/heart_rate.h"
+#include "pca10040/s132/ses/buttons.h"
 #include "pca10040/s132/ses/events.h"
 #include "pca10040/s132/ses/gpio.h"
-#include "pca10040/s132/ses/ble_custom.h"
 #include "pca10040/s132/ses/base_service.h"
 #include "pca10040/s132/ses/services.h"
 
@@ -132,7 +133,7 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the curr
 // YOUR_JOB: Use UUIDs for service(s) used in your application.
 static ble_uuid_t m_adv_uuids[] = /**< Universally unique service identifiers. */
     {
-        {CUSTOM_SERVICE_UUID, BLE_UUID_TYPE_VENDOR_BEGIN}};
+        {BASE_SERVICE_UUID, BLE_UUID_TYPE_VENDOR_BEGIN}};
 
 static void advertising_start(bool erase_bonds);
 
@@ -641,7 +642,7 @@ static void buttons_leds_init(bool * p_erase_bonds)
     ret_code_t err_code;
     bsp_event_t startup_event;
 
-    err_code = bsp_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS, bsp_event_handler);
+    err_code = bsp_init(BSP_INIT_LEDS, bsp_event_handler);
     APP_ERROR_CHECK(err_code);
 
     err_code = bsp_btn_ble_init(NULL, &startup_event);
@@ -723,6 +724,7 @@ int main(void)
 
     // SmartCare Initialization.
     gpio_init();
+    nrf_drv_systick_init();
 
     // Start execution.
     NRF_LOG_INFO("Template example started.");
@@ -732,11 +734,14 @@ int main(void)
 
     accelerometer_start();
     heart_rate_start();
+    buttons_start();
 
     // Enter main loop.
     for (;;) {
         consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
         consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
+        consume_event(LeftButtonInterruptionEvt, handle_left_button_interruption);
+        consume_event(RightButtonInterruptionEvt, handle_right_button_interruption);
         NRF_LOG_FLUSH();
         nrf_delay_ms(10);
         idle_state_handle();

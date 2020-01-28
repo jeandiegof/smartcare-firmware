@@ -4,6 +4,7 @@
 #include "nrf_gpiote.h"
 #include "nrf_drv_gpiote.h"
 #include "nrf_log.h"
+#include "nrf_assert.h"
 
 void gpio_init(void) {
     ret_code_t err_code;
@@ -14,11 +15,8 @@ void gpio_init(void) {
     }
 }
 
-void enable_gpio_interrupt(uint8_t pin, interrupt_callback callback, nrf_gpiote_polarity_t sense, nrf_gpio_pin_pull_t pull) {
-    if (callback == NULL) {
-        NRF_LOG_ERROR("\r\nInterrupt callback is NULL.");
-        return;
-    }
+ret_code_t enable_gpio_interrupt(uint8_t pin, interrupt_callback callback, nrf_gpiote_polarity_t sense, nrf_gpio_pin_pull_t pull) {
+    ASSERT(callback != NULL);
 
     nrf_drv_gpiote_in_config_t interrupt_config = {
         .sense = sense,            
@@ -28,12 +26,7 @@ void enable_gpio_interrupt(uint8_t pin, interrupt_callback callback, nrf_gpiote_
         .skip_gpio_setup = false,
     };
 
-    if (!nrf_drv_gpiote_in_is_set(pin)) {
-        ret_code_t err_code = nrf_drv_gpiote_in_init(pin, &interrupt_config, callback);
-        APP_ERROR_CHECK(err_code);
-
-        nrf_drv_gpiote_in_event_enable(pin, true);
-    } else {
-        NRF_LOG_INFO("\r\nGPIO already used.");
-    }
+    VERIFY_SUCCESS(nrf_drv_gpiote_in_init(pin, &interrupt_config, callback));
+    nrf_drv_gpiote_in_event_enable(pin, true);
+    return NRF_SUCCESS;
 }

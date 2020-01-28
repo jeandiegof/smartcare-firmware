@@ -8,6 +8,8 @@ typedef void (*delegate_function)(void);
 typedef enum {
     AccelerometerInterruptionEvt = (1 << 0),
     HeartrateInterruptionEvt = (1 << 1),
+    LeftButtonInterruptionEvt = (1 << 2),
+    RightButtonInterruptionEvt = (1 << 3),
 } Event;
 
 void set_event(Event event);

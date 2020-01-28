@@ -93,6 +93,7 @@
       <file file_name="$(SDK)/integration/nrfx/legacy/nrf_drv_twi.c" />
       <file file_name="$(SDK)/modules/nrfx/drivers/src/nrfx_twi.c" />
       <file file_name="$(SDK)/modules/nrfx/drivers/src/nrfx_twim.c" />
+      <file file_name="$(SDK)/modules/nrfx/drivers/src/nrfx_systick.c" />
     </folder>
     <folder Name="Board Support">
       <file file_name="$(SDK)/components/libraries/bsp/bsp.c" />
@@ -154,6 +155,10 @@
           <file file_name="utils.c" />
           <file file_name="utils.h" />
         </folder>
+      </folder>
+      <folder Name="buttons">
+        <file file_name="buttons.c" />
+        <file file_name="buttons.h" />
       </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
