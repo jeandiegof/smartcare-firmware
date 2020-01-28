@@ -7,8 +7,6 @@
 #include "nrf.h"
 #include "nrf_log.h"
 
-#include <stdint.h>
-
 enum ADXL345Registers {
     DEVID = 0x00,
     THRESH_TAP = 0x1D,
@@ -117,15 +115,15 @@ const uint8_t *adxl345_request_axis_data(void) {
     return m_samples;
 }
 
-uint8_t adxl345_free_fall(void) { return _free_fall; }
+bool adxl345_free_fall(void) { return _free_fall; }
 
 void adxl345_clear_free_fall(void) { _free_fall = false; }
 
-uint8_t adxl345_activity(void) { return _activity; }
+bool adxl345_activity(void) { return _activity; }
 
 void adxl345_clear_activity(void) { _activity = false; }
 
-uint8_t adxl345_inactivity(void) { return _inactivity; }
+bool adxl345_inactivity(void) { return _inactivity; }
 
 void adxl345_clear_inactivity(void) { _inactivity = false; }
 
