@@ -28,7 +28,7 @@
       linker_printf_width_precision_supported="Yes"
       linker_scanf_fmt_level="long"
       linker_section_placement_file="flash_placement.xml"
-      linker_section_placement_macros="FLASH_PH_START=0x0;FLASH_PH_SIZE=0x80000;RAM_PH_START=0x20000000;RAM_PH_SIZE=0x10000;FLASH_START=0x26000;FLASH_SIZE=0x5a000;RAM_START=0x20002250;RAM_SIZE=0xddb0"
+      linker_section_placement_macros="FLASH_PH_START=0x0;FLASH_PH_SIZE=0x80000;RAM_PH_START=0x20000000;RAM_PH_SIZE=0x10000;FLASH_START=0x26000;FLASH_SIZE=0x5a000;RAM_START=0x20002260;RAM_SIZE=0xdde0"
       linker_section_placements_segments="FLASH RX 0x0 0x80000;RAM RWX 0x20000000 0x10000"
       macros="CMSIS_CONFIG_TOOL=$(SDK)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar;SDK=C:/Users/leoni/projects/smartcare-firmware/nRF5_SDK_16.0.0_98a08e2"
       project_directory=""
@@ -99,7 +99,11 @@
       <file file_name="$(SDK)/components/libraries/bsp/bsp_btn_ble.c" />
     </folder>
     <folder Name="Application">
-      <file file_name="../../../main.c" />
+      <file file_name="../../../main.c">
+        <configuration
+          Name="Release"
+          c_user_include_directories=".;$(ProjectDir)" />
+      </file>
       <file file_name="../config/sdk_config.h" />
       <folder Name="accelerometer">
         <folder Name="adxl345">
@@ -135,6 +139,22 @@
       </folder>
       <file file_name="events.c" />
       <file file_name="events.h" />
+      <folder Name="ble">
+        <folder Name="services">
+          <folder Name="base_service">
+            <file file_name="base_service.c" />
+            <file file_name="base_service.h" />
+            <file file_name="base_service_chars.c" />
+            <file file_name="base_service_chars.h" />
+          </folder>
+          <file file_name="services.h" />
+          <file file_name="services.c" />
+        </folder>
+        <folder Name="utils">
+          <file file_name="utils.c" />
+          <file file_name="utils.h" />
+        </folder>
+      </folder>
     </folder>
     <folder Name="nRF_Segger_RTT">
       <file file_name="$(SDK)/external/segger_rtt/SEGGER_RTT.c" />
