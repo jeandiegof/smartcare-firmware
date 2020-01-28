@@ -174,7 +174,6 @@ static void setup_interruption(void) {
     twi_write_data(_twi, MAX30101_ADDRESS, data_register,
                    sizeof(data_register));
 }
-
 void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
     set_event(HeartrateInterruptionEvt);
 }
@@ -209,9 +208,8 @@ void max30101_setup(void) {
     set_adc_range(MAX30101_RANGE16384);
     setup_interruption();
     set_mode(MULTI_LED);
-
     wait_for_heart_rate_sample();
-    NRF_LOG_INFO("%d", read_hr_sample());
+    read_hr_sample();
 }
 
 void max30101_init(void) {

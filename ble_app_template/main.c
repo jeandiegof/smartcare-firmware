@@ -741,6 +741,7 @@ int main(void)
         NRF_LOG_INFO("max30101_interrupt_count %d", max30101_interrupt_count);
 
 //        consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
+//        NRF_LOG_INFO("porra = %d.", porra);
         consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
         consume_event(LeftButtonInterruptionEvt, handle_left_button_interruption);
         consume_event(RightButtonInterruptionEvt, handle_right_button_interruption);
@@ -749,8 +750,3 @@ int main(void)
         idle_state_handle();
     }
 }
-
-
-/**
- * @}
- */

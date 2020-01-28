@@ -171,14 +171,15 @@ static bool detect_heart_beat(float sample) {
 static void process_new_sample(uint32_t sample) {
     float filtered_sample = high_pass_filter((float)sample);
     filtered_sample = butterworth_filter(filtered_sample);
+    //NRF_LOG_INFO("%d", filtered_sample);
     const bool beat_detected = detect_heart_beat(filtered_sample);
     if (beat_detected) {
-        NRF_LOG_DEBUG("There is an available bpm: %d.", get_available_bpm());
+        NRF_LOG_INFO("There is an available bpm: %d.", get_available_bpm());
     }
 }
 
 void handle_heart_rate_interruption(void) {
+//    wait_for_heart_rate_sample();
     const uint32_t sample = read_hr_sample();
-    NRF_LOG_DEBUG("It processes the sample signal to get bpm's.");
     process_new_sample(sample);
 }
