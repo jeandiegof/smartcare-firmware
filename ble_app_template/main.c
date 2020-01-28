@@ -89,7 +89,6 @@
 #include "pca10040/s132/ses/buttons.h"
 #include "pca10040/s132/ses/events.h"
 #include "pca10040/s132/ses/gpio.h"
-#include "pca10040/s132/ses/ble_custom.h"
 #include "pca10040/s132/ses/base_service.h"
 #include "pca10040/s132/ses/services.h"
 
@@ -134,7 +133,7 @@ static uint16_t m_conn_handle = BLE_CONN_HANDLE_INVALID; /**< Handle of the curr
 // YOUR_JOB: Use UUIDs for service(s) used in your application.
 static ble_uuid_t m_adv_uuids[] = /**< Universally unique service identifiers. */
     {
-        {CUSTOM_SERVICE_UUID, BLE_UUID_TYPE_VENDOR_BEGIN}};
+        {BASE_SERVICE_UUID, BLE_UUID_TYPE_VENDOR_BEGIN}};
 
 static void advertising_start(bool erase_bonds);
 

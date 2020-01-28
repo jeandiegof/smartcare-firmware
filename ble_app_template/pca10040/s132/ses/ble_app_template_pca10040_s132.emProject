@@ -155,6 +155,7 @@
           <file file_name="utils.c" />
           <file file_name="utils.h" />
         </folder>
+      </folder>
       <folder Name="buttons">
         <file file_name="buttons.c" />
         <file file_name="buttons.h" />
