@@ -10,10 +10,16 @@
 #define BUTTON_DEBOUCING_TIME_US 50000
 
 enum ButtonPin {
-    LeftButtonPin = 15, // 31
+    LeftButtonPin = 31, // 15 on dev kit
     RightButtonPin = 14,
 };
 typedef uint8_t ButtonPin;
+
+enum Button {
+    LeftButton = 1,
+    RightButton = 2,
+};
+typedef uint8_t Button;
 
 static nrf_drv_systick_state_t left_button_last_click;
 static nrf_drv_systick_state_t right_button_last_click;
@@ -34,12 +40,12 @@ static void right_button_callback(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_
 
 void handle_left_button_interruption(void) {
     NRF_LOG_INFO("Left button pressed");
-    // TODO: notify using notify_emergency from https://github.com/jeandiegof/smartcare-firmware/pull/7
+    notify_emergency(LeftButton);
 }
 
 void handle_right_button_interruption(void) {
     NRF_LOG_INFO("Right button pressed");
-    // TODO: notify using notify_emergency from https://github.com/jeandiegof/smartcare-firmware/pull/7
+    notify_emergency(RightButton);
 }
 
 void buttons_start(void) {
