@@ -11,6 +11,7 @@ void accelerometer_start(void) {
     adxl345_start_free_fall_mode();
     adxl345_start_activity_detection_mode();
     adxl345_start_inactivity_detection_mode();
+    fall_detector_init();
 }
 
 uint8_t accelerometer_free_fall(void) { return adxl345_free_fall(); }
@@ -50,7 +51,7 @@ void handle_accelerometer_interruption(void) {
     update_fall_detector_state();
 
     if (fall_detected()) {
-        NRF_LOG_INFO("\r\nFall Detected!");
+        NRF_LOG_INFO("Fall Detected!");
         notify_fall_detection(true);
         clear_fall_detected();
     }
