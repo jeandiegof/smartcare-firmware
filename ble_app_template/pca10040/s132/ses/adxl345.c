@@ -7,8 +7,6 @@
 #include "nrf.h"
 #include "nrf_log.h"
 
-#include <stdint.h>
-
 enum ADXL345Registers {
     DEVID = 0x00,
     THRESH_TAP = 0x1D,
@@ -43,6 +41,12 @@ enum ADXL345Registers {
 };
 typedef uint8_t ADXL345Registers;
 
+typedef enum InterruptSource {
+    FREE_FALL = 0b00000100,
+    ACTIVITY = 0b00010000,
+    INACTIVITY = 0b00001000,
+} InterruptSource;
+
 #define ADXL345_ADDR 0x53U
 
 // GPIOs
@@ -57,10 +61,9 @@ enum ADXL345Pins {
 static const nrf_drv_twi_t *_twi;
 
 // local variables
-static volatile uint8_t _fall_count = 0;
-static volatile uint8_t _activity_count = 0;
-static volatile uint8_t _inactivity_count = 0;
-static volatile uint8_t _interrupt_count = 0;
+static bool _free_fall = false;
+static bool _activity = false;
+static bool _inactivity = false;
 static uint8_t m_samples[6] = {0};
 
 // local functions
@@ -112,17 +115,17 @@ const uint8_t *adxl345_request_axis_data(void) {
     return m_samples;
 }
 
-uint8_t adxl345_fall_count(void) {
-    return _fall_count;
-}
+bool adxl345_free_fall(void) { return _free_fall; }
 
-uint8_t adxl345_activity_count(void) {
-    return _activity_count;
-}
+void adxl345_clear_free_fall(void) { _free_fall = false; }
 
-uint8_t adxl345_inactivity_count(void) {
-    return _inactivity_count;
-}
+bool adxl345_activity(void) { return _activity; }
+
+void adxl345_clear_activity(void) { _activity = false; }
+
+bool adxl345_inactivity(void) { return _inactivity; }
+
+void adxl345_clear_inactivity(void) { _inactivity = false; }
 
 static void enable_measurement_mode(void) {
     uint8_t current_measurement_mode = 0;
@@ -159,7 +162,7 @@ static void enable_free_fall_interrupt(void) {
 
 // Activity/Impact detection
 static void setup_activity_detection_mode(void) {
-    const uint8_t activity_threshold[2] = {THRESH_ACT, 0x08}; // 0.5g
+    const uint8_t activity_threshold[2] = {THRESH_ACT, 0x80}; // 8.0g
     twi_write_data(_twi, ADXL345_ADDR, activity_threshold, sizeof(activity_threshold));
 
     uint8_t current_activity_inactivity_control = 0;
@@ -190,7 +193,7 @@ static void setup_inactivity_detection_mode(void) {
     const uint8_t inactivity_threshold[2] = {THRESH_INACT, 0x03}; // 0.1875g
     twi_write_data(_twi, ADXL345_ADDR, inactivity_threshold, sizeof(inactivity_threshold));
 
-    const uint8_t inactivity_time[2] = {TIME_INACT, 0x02}; // 2s
+    const uint8_t inactivity_time[2] = {TIME_INACT, 0x01}; // 1s
     twi_write_data(_twi, ADXL345_ADDR, inactivity_time, sizeof(inactivity_time));
 
     uint8_t current_activity_inactivity_control = 0;
@@ -226,19 +229,22 @@ void on_int1_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
     set_event(AccelerometerInterruptionEvt);
 }
 
-void adxl345_handle_interrupt(void) {
-    _interrupt_count++;
-
+static uint8_t read_interrupt_source(void) {
     uint8_t interrupt_source = 0;
     twi_read_data(_twi, ADXL345_ADDR, INT_SOURCE, &interrupt_source, sizeof(interrupt_source));
+    return interrupt_source;
+}
 
-    if (interrupt_source & 0b00000100) {
-        _fall_count++;
+void adxl345_handle_interrupt(void) {
+    InterruptSource interrupt_source = read_interrupt_source();
+
+    if (interrupt_source & FREE_FALL) {
+        _free_fall = true;
     }
-    if (interrupt_source & 0b00010000) {
-        _activity_count++;
+    if (interrupt_source & ACTIVITY) {
+        _activity = true;
     }
-    if (interrupt_source & 0b00001000) {
-        _inactivity_count++;
+    if (interrupt_source & INACTIVITY) {
+        _inactivity = true;
     }
 }

@@ -1,6 +1,7 @@
 #include "buttons.h"
 #include "gpio.h"
 #include "events.h"
+#include "services.h"
 
 #include "nrf_drv_systick.h"
 #include "nrf_log.h"
