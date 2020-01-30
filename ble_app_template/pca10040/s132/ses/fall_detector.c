@@ -25,8 +25,7 @@ void start_fall_detector_timer(uint32_t timer_timeout_ms);
 void stop_fall_detector_timer(void);
 
 void fall_detector_init(void) {
-    ret_code_t err_code;
-    err_code = app_timer_create(&m_app_timer_id, APP_TIMER_MODE_SINGLE_SHOT, reset_fall_detector_state);
+    ret_code_t err_code = app_timer_create(&m_app_timer_id, APP_TIMER_MODE_SINGLE_SHOT, reset_fall_detector_state);
     APP_ERROR_CHECK(err_code);
 }
 
