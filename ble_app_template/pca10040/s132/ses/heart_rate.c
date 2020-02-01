@@ -1,9 +1,11 @@
 #include "heart_rate.h"
+#include "services.h"
 #include "app_timer.h"
 #include <stdbool.h>
 #include "nrf_drv_systick.h"
 #include "nrf_log.h"
 #include <stdint.h>
+#include <math.h>
 
 #ifdef MAX30100
 #include "max30100.h"
@@ -30,10 +32,10 @@
 #define MASKING_HOLDOFF_TICKS APP_TIMER_TICKS(200)  // non-retriggerable window after beat detection
 #define MIN_THRESHOLD -300.0                        // 20
 #define MAX_THRESHOLD 800.0
-#define STEP_RESILIENCY 30.0          // maximum negative jump that triggers the beat edge
-#define THRESHOLD_FALLOFF_TARGET 0.3  // thr chasing factor of the max value when beat
-#define THRESHOLD_DECAY_FACTOR 0.99   // thr chasing factor when no beat
-#define INVALID_READOUT_DELAY_TICKS APP_TIMER_TICKS(2000)  // in ms, no-beat time to cause a reset
+#define STEP_RESILIENCY 30.0           // maximum negative jump that triggers the beat edge
+#define THRESHOLD_FALLOFF_TARGET 0.3   // thr chasing factor of the max value when beat
+#define THRESHOLD_DECAY_FACTOR 0.99    // thr chasing factor when no beat
+#define INVALID_READOUT_DELAY_MS 1500  // no-beat time to cause a reset
 
 typedef enum {
     BeatdetectorStateInit,
@@ -140,7 +142,7 @@ static bool detect_heart_beat(float sample) {
 
             if (app_timer_cnt_diff_compute(
                     app_timer_cnt_diff_compute(app_timer_cnt_get(), _time_last_beat_ticks),
-                    _last_time_measured_ticks) > INVALID_READOUT_DELAY_TICKS) {
+                    _last_time_measured_ticks) > APP_TIMER_TICKS(INVALID_READOUT_DELAY_MS)) {
                 _first_peak = true;
                 _last_mat_sample_value = 0.0;
                 _last_time_measured_ticks = app_timer_cnt_get();
@@ -161,7 +163,7 @@ static bool detect_heart_beat(float sample) {
             if (sample + STEP_RESILIENCY < _current_threshold) {
                 static uint32_t _previous_beat_detected_at_ms = 0;
                 static uint32_t _beat_detected_at_ms = 0;
-                const float alpha = 0.2;
+                const float alpha = 0.3;
                 _time_last_beat_ticks = app_timer_cnt_get();
                 _first_peak = _first_peak ? false : _first_peak;
                 _last_mat_sample_value = sample;
@@ -177,6 +179,10 @@ static bool detect_heart_beat(float sample) {
 
                 const uint32_t peaks_distance_ms =
                     abs(_beat_detected_at_ms - _previous_beat_detected_at_ms);
+
+                if (peaks_distance_ms >= INVALID_READOUT_DELAY_MS) {
+                    break;
+                }
 
                 _beat_period_ms =
                     alpha * (float)peaks_distance_ms + (1.0 - alpha) * _beat_period_ms;
@@ -203,7 +209,9 @@ static void process_new_sample(float sample) {
     const float filtered_sample = filter(sample);
     const bool beat_detected = detect_heart_beat(filtered_sample);
     if (beat_detected) {
-        NRF_LOG_INFO("There is an available bpm: %d.", (int)get_available_bpm());
+        const uint8_t heart_rate = (uint8_t)get_available_bpm();
+        notify_bpm(heart_rate);
+        NRF_LOG_INFO("There is an available heart_rate: %d.", heart_rate);
     }
 }
 
