@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "nrf_drv_systick.h"
 #include "nrf_log.h"
+
 #ifdef MAX30100
 #include "max30100.h"
 #else
@@ -20,15 +21,12 @@
 
 #define POLE 0.05
 
-#define INIT_HOLDOFF_TICKS \
-    APP_TIMER_TICKS(2000)  // how long to wait before counting
-#define MASKING_HOLDOFF_TICKS \
-    APP_TIMER_TICKS(40)  // non-retriggerable window after beat detection
+#define INIT_HOLDOFF_TICKS APP_TIMER_TICKS(2000)   // how long to wait before counting
+#define MASKING_HOLDOFF_TICKS APP_TIMER_TICKS(40)  // non-retriggerable window after beat detection
 #define MIN_THRESHOLD 20
 #define MAX_THRESHOLD 800
-#define STEP_RESILIENCY 30  // maximum negative jump that triggers the beat edge
-#define THRESHOLD_FALLOFF_TARGET \
-    0.3  // thr chasing factor of the max value when beat
+#define STEP_RESILIENCY 30             // maximum negative jump that triggers the beat edge
+#define THRESHOLD_FALLOFF_TARGET 0.3   // thr chasing factor of the max value when beat
 #define THRESHOLD_DECAY_FACTOR 0.99    // thr chasing factor when no beat
 #define INVALID_READOUT_DELAY_MS 2000  // in ms, no-beat time to cause a reset
 
@@ -54,6 +52,7 @@ void heart_rate_start(void) {
     max30101_setup();
 #endif
     _last_time_measured_ticks = app_timer_cnt_get();
+    NRF_LOG_INFO("last measured time %d", _last_time_measured_ticks);
 }
 
 static float high_pass_filter(float sample) {
@@ -79,8 +78,8 @@ static void beatDetectorDecreaseThreshold(void) {
     // When a valid beat rate readout is present, target the
     const uint8_t SAMPLING_PERIOD = 1000 / 50;
     if (_lastMaxValue > 0 && _beatPeriod > 0) {
-        _current_threshold -= _lastMaxValue * (1 - THRESHOLD_FALLOFF_TARGET) /
-                     (_beatPeriod / SAMPLING_PERIOD);
+        _current_threshold -=
+            _lastMaxValue * (1 - THRESHOLD_FALLOFF_TARGET) / (_beatPeriod / SAMPLING_PERIOD);
     } else {
         // Asymptotic decay
         _current_threshold *= THRESHOLD_DECAY_FACTOR;
@@ -106,31 +105,39 @@ static bool detect_heart_beat(float sample) {
 
     switch (_stateBeat) {
         case BeatdetectorStateInit:
-            if (app_timer_cnt_diff_compute(app_timer_cnt_get(),
-                                           INIT_HOLDOFF_TICKS) > 0) {
+            NRF_LOG_INFO("1");
+            if (app_timer_cnt_diff_compute(_last_time_measured_ticks, app_timer_cnt_get()) >
+                INIT_HOLDOFF_TICKS) {
+                NRF_LOG_INFO("2");
                 _last_time_measured_ticks = app_timer_cnt_get();
                 _stateBeat = BeatdetectorStateWaiting;
             }
             break;
 
         case BeatdetectorStateWaiting:
+            NRF_LOG_INFO("3");
             if (sample > _current_threshold) {
+                NRF_LOG_INFO("4");
                 _current_threshold = min(sample, MAX_THRESHOLD);
                 _stateBeat = BeatdetectorStateFollowingSlope;
             }
 
             // Tracking lost, resetting
             if (app_timer_cnt_diff_compute(
-                    app_timer_cnt_get(),
-                    INVALID_READOUT_DELAY_MS + _time_last_beat_ticks) > 0) {
+                    _last_time_measured_ticks,
+                    app_timer_cnt_diff_compute(app_timer_cnt_get(), _time_last_beat_ticks)) >
+                INVALID_READOUT_DELAY_MS) {
+                NRF_LOG_INFO("5");
                 _beatPeriod = 0;
                 _lastMaxValue = 0;
+                _last_time_measured_ticks = app_timer_cnt_get();
             }
 
             beatDetectorDecreaseThreshold();
             break;
 
         case BeatdetectorStateFollowingSlope:
+            NRF_LOG_INFO("6 %d, %d", sample, _current_threshold);
             if (sample < _current_threshold) {
                 _stateBeat = BeatdetectorStateMaybeDetected;
             } else {
@@ -139,6 +146,7 @@ static bool detect_heart_beat(float sample) {
             break;
 
         case BeatdetectorStateMaybeDetected:
+            NRF_LOG_INFO("7 %d, %d", sample, _current_threshold);
             if (sample + STEP_RESILIENCY < _current_threshold) {
                 // Found a beat
                 beat_detected = true;
@@ -149,7 +157,6 @@ static bool detect_heart_beat(float sample) {
                     const float alpha = 0.15;
                     _beatPeriod = alpha * delta + (1 - alpha) * _beatPeriod;
                 }
-
                 _time_last_beat_ticks = app_timer_cnt_get();
             } else {
                 _stateBeat = BeatdetectorStateFollowingSlope;
@@ -157,9 +164,12 @@ static bool detect_heart_beat(float sample) {
             break;
 
         case BeatdetectorStateMasking:
-            if (app_timer_cnt_get() - _time_last_beat_ticks >
+            if (app_timer_cnt_diff_compute(
+                    _last_time_measured_ticks,
+                    app_timer_cnt_diff_compute(app_timer_cnt_get(), _time_last_beat_ticks)) >
                 MASKING_HOLDOFF_TICKS) {
                 _stateBeat = BeatdetectorStateWaiting;
+                _last_time_measured_ticks = app_timer_cnt_get();
             }
             beatDetectorDecreaseThreshold();
             break;
@@ -171,7 +181,7 @@ static bool detect_heart_beat(float sample) {
 static void process_new_sample(uint32_t sample) {
     float filtered_sample = high_pass_filter((float)sample);
     filtered_sample = butterworth_filter(filtered_sample);
-    //NRF_LOG_INFO("%d", filtered_sample);
+    // NRF_LOG_INFO("%d", filtered_sample);
     const bool beat_detected = detect_heart_beat(filtered_sample);
     if (beat_detected) {
         NRF_LOG_INFO("There is an available bpm: %d.", get_available_bpm());
@@ -179,7 +189,7 @@ static void process_new_sample(uint32_t sample) {
 }
 
 void handle_heart_rate_interruption(void) {
-//    wait_for_heart_rate_sample();
+    //    wait_for_heart_rate_sample();
     const uint32_t sample = read_hr_sample();
     process_new_sample(sample);
 }
