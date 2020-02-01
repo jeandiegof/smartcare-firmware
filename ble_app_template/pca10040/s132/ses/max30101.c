@@ -1,7 +1,7 @@
 #include "max30101.h"
 #include "events.h"
 #include "gpio.h"
-
+#include "app_timer.h"
 #include "app_error.h"
 #include "nrf.h"
 #include "nrf_assert.h"
@@ -14,6 +14,8 @@
 #include <stdint.h>
 
 #define MAX30101_ADDRESS 0x57
+
+APP_TIMER_DEF(heart_rate_timer_id);
 
 static uint8_t current_ma_to_register(uint8_t current_ma) {
     uint16_t register_value = (((uint16_t)current_ma * 0x00ff) / 51);
@@ -101,8 +103,7 @@ static void set_mode(Mode mode) {
     twi_read_data(_twi, MAX30101_ADDRESS, MODE_CONFIG, &current_mode_config,
                   sizeof(current_mode_config));
 
-    const uint8_t mode_config[] = {MODE_CONFIG,
-                                   (current_mode_config & 0b11111000) | mode};
+    const uint8_t mode_config[] = {MODE_CONFIG, (current_mode_config & 0b11111000) | mode};
     twi_write_data(_twi, MAX30101_ADDRESS, mode_config, sizeof(mode_config));
 }
 
@@ -121,77 +122,65 @@ static bool reset(void) {
     return false;
 }
 
-static void set_leds_current(uint8_t red_current, uint8_t ir_current,
-                             uint8_t green1_current, uint8_t green2_current) {
-    const uint8_t red_data[2] = {LED1_PULSE_AMPLITUDE,
-                                 current_ma_to_register(red_current)};
+static void set_leds_current(uint8_t red_current, uint8_t ir_current, uint8_t green1_current,
+                             uint8_t green2_current) {
+    const uint8_t red_data[2] = {LED1_PULSE_AMPLITUDE, current_ma_to_register(red_current)};
     twi_write_data(_twi, MAX30101_ADDRESS, red_data, sizeof(red_data));
 
-    const uint8_t ir_data[2] = {LED2_PULSE_AMPLITUDE,
-                                current_ma_to_register(ir_current)};
+    const uint8_t ir_data[2] = {LED2_PULSE_AMPLITUDE, current_ma_to_register(ir_current)};
     twi_write_data(_twi, MAX30101_ADDRESS, ir_data, sizeof(ir_data));
 
-    const uint8_t green1_data[2] = {LED3_PULSE_AMPLITUDE,
-                                    current_ma_to_register(green1_current)};
+    const uint8_t green1_data[2] = {LED3_PULSE_AMPLITUDE, current_ma_to_register(green1_current)};
     twi_write_data(_twi, MAX30101_ADDRESS, green1_data, sizeof(green1_data));
 
-    const uint8_t green2_data[2] = {LED3_PULSE_AMPLITUDE,
-                                    current_ma_to_register(green2_current)};
+    const uint8_t green2_data[2] = {LED3_PULSE_AMPLITUDE, current_ma_to_register(green2_current)};
     twi_write_data(_twi, MAX30101_ADDRESS, green2_data, sizeof(green2_data));
 }
 
-static void set_leds_slots(uint8_t slot1, uint8_t slot2, uint8_t slot3,
-                           uint8_t slot4) {
+static void set_leds_slots(uint8_t slot1, uint8_t slot2, uint8_t slot3, uint8_t slot4) {
     const uint8_t data_register1[2] = {MULTI_LED_MODE_1, slot2 << 4 | slot1};
-    twi_write_data(_twi, MAX30101_ADDRESS, data_register1,
-                   sizeof(data_register1));
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register1, sizeof(data_register1));
 
     const uint8_t data_register2[2] = {MULTI_LED_MODE_2, slot4 << 4 | slot3};
-    twi_write_data(_twi, MAX30101_ADDRESS, data_register2,
-                   sizeof(data_register2));
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register2, sizeof(data_register2));
 }
 
 static void set_sampling_rate(SamplingRate sampling_rate) {
     const uint8_t data_register[2] = {SPO2_CONFIG, sampling_rate << 2};
-    twi_write_data(_twi, MAX30101_ADDRESS, data_register,
-                   sizeof(data_register));
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register, sizeof(data_register));
 }
 
 static void set_pulse_width(LEDPulseWidth pw) {
     const uint8_t data_register[2] = {SPO2_CONFIG, pw};
-    twi_write_data(_twi, MAX30101_ADDRESS, data_register,
-                   sizeof(data_register));
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register, sizeof(data_register));
 }
 
 static void set_adc_range(ADCRange adc_range) {
     const uint8_t data_register[2] = {SPO2_CONFIG, adc_range << 5};
-    twi_write_data(_twi, MAX30101_ADDRESS, data_register,
-                   sizeof(data_register));
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register, sizeof(data_register));
 }
 
 static void setup_interruption(void) {
     const uint8_t data_register[2] = {INTERRUPT_ENABLE_1, PPG_RDY};
-    twi_write_data(_twi, MAX30101_ADDRESS, data_register,
-                   sizeof(data_register));
+    twi_write_data(_twi, MAX30101_ADDRESS, data_register, sizeof(data_register));
 }
-void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
-    set_event(HeartrateInterruptionEvt);
-}
+
+void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) { set_event(HeartrateInterruptionEvt); }
+
+void timer_cb(void* p_context) { set_event(HeartrateInterruptionEvt); }
 
 uint32_t read_hr_sample(void) {
     // This depends on the number of slots configured. For 1 led in the first
     // slot, we'll read 3 bytes
     uint8_t read_data[6] = {0};
-    twi_read_data(_twi, MAX30101_ADDRESS, FIFO_DATA_REGISTER, read_data,
-                  sizeof(read_data));
+    twi_read_data(_twi, MAX30101_ADDRESS, FIFO_DATA_REGISTER, read_data, sizeof(read_data));
     return (read_data[3] << 16 | read_data[4] << 8 | read_data[5]);
 }
 
 void wait_for_heart_rate_sample(void) {
     uint8_t read_data[1] = {0};
     do {
-        twi_read_data(_twi, MAX30101_ADDRESS, INTERRUPT_STATUS_1, read_data,
-                      sizeof(read_data));
+        twi_read_data(_twi, MAX30101_ADDRESS, INTERRUPT_STATUS_1, read_data, sizeof(read_data));
         nrf_delay_ms(5);
     } while (!(read_data[0] & PPG_RDY));
 }
@@ -199,9 +188,8 @@ void wait_for_heart_rate_sample(void) {
 void max30101_setup(void) {
     ASSERT(reset());
     nrf_delay_ms(50);
-    set_leds_current(
-        0, 0, 100,
-        100);  // Max value for led current = 51 mA (TODO: clip this value).
+    set_leds_current(0, 0, 100,
+                     100);           // Max value for led current = 51 mA (TODO: clip this value).
     set_leds_slots(0b011, 0, 0, 0);  // 0x011 -> green. Datasheet Pag. 22.
     set_sampling_rate(MAX30101_SR_50);
     set_pulse_width(MAX3010_LED_PW_411);
@@ -210,10 +198,12 @@ void max30101_setup(void) {
     set_mode(MULTI_LED);
     wait_for_heart_rate_sample();
     read_hr_sample();
+    // err_code =
+    //     app_timer_create(&heart_rate_timer_id, APP_TIMER_MODE_REPEATED, timer_cb);
 }
 
 void max30101_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
-    APP_ERROR_CHECK(enable_gpio_interrupt(INT_PIN, &on_int_interrupt,
-                          NRF_GPIOTE_POLARITY_HITOLO, NRF_GPIO_PIN_PULLUP));
+    APP_ERROR_CHECK(enable_gpio_interrupt(INT_PIN, &on_int_interrupt, NRF_GPIOTE_POLARITY_HITOLO,
+                                          NRF_GPIO_PIN_PULLUP));
 }
