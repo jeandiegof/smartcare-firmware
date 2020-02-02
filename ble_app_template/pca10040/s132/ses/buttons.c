@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-#define BUTTON_DEBOUCING_TIME_US 50000
+#define BUTTON_DEBOUCING_TIME_US 20000
 
 enum ButtonPin {
     LeftButtonPin = 31, // 15 on dev kit
