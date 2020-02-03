@@ -732,17 +732,23 @@ int main(void)
 
     advertising_start(erase_bonds);
 
-//    accelerometer_start();
+    accelerometer_start();
     heart_rate_start();
-//    buttons_start();
+    buttons_start();
 
+    // Enter main loop.
     for (;;) {
+        consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
         consume_event(HeartrateInterruptionEvt, handle_heart_rate_interruption);
         consume_event(LeftButtonInterruptionEvt, handle_left_button_interruption);
         consume_event(RightButtonInterruptionEvt, handle_right_button_interruption);
-        consume_event(AccelerometerInterruptionEvt, handle_accelerometer_interruption);
         NRF_LOG_FLUSH();
         nrf_delay_ms(10);
         idle_state_handle();
     }
 }
+
+
+/**
+ * @}
+ */
