@@ -1,3 +1,5 @@
+#include "app_timer.h"
+#include "heart_rate.h"
 #include "max30101.h"
 #include "events.h"
 #include "gpio.h"
@@ -165,7 +167,9 @@ static void setup_interruption(void) {
     twi_write_data(_twi, MAX30101_ADDRESS, data_register, sizeof(data_register));
 }
 
-void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) { set_event(HeartrateInterruptionEvt); }
+void on_int_interrupt(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {
+    set_event(HeartrateInterruptionEvt);
+}
 
 void timer_cb(void* p_context) { set_event(HeartrateInterruptionEvt); }
 
@@ -185,25 +189,48 @@ void wait_for_heart_rate_sample(void) {
     } while (!(read_data[0] & PPG_RDY));
 }
 
+static SamplingRate sampling_rate_hz_to_max10101_register_value(uint32_t sampling_rate_hz) {
+    switch (sampling_rate_hz) {
+        case 50:
+            return MAX30101_SR_50;
+        case 100:
+            return MAX30101_SR_100;
+        case 200:
+            return MAX30101_SR_200;
+        case 400:
+            return MAX30101_SR_400;
+        case 800:
+            return MAX30101_SR_800;
+        case 1000:
+            return MAX30101_SR_1000;
+        case 1600:
+            return MAX30101_SR_1600;
+        case 3200:
+            return MAX30101_SR_3200;
+        default:
+            APP_ERROR_CHECK(-1);
+    }
+}
+
 void max30101_setup(void) {
     ASSERT(reset());
     nrf_delay_ms(50);
     set_leds_current(0, 0, 100,
                      100);           // Max value for led current = 51 mA (TODO: clip this value).
     set_leds_slots(0b011, 0, 0, 0);  // 0x011 -> green. Datasheet Pag. 22.
-    set_sampling_rate(MAX30101_SR_50);
+    set_sampling_rate(sampling_rate_hz_to_max10101_register_value(SAMPLING_RATE_HZ));
     set_pulse_width(MAX3010_LED_PW_411);
     set_adc_range(MAX30101_RANGE16384);
     setup_interruption();
     set_mode(MULTI_LED);
     wait_for_heart_rate_sample();
     read_hr_sample();
-    // err_code =
-    //     app_timer_create(&heart_rate_timer_id, APP_TIMER_MODE_REPEATED, timer_cb);
+
+    app_timer_start(heart_rate_timer_id, APP_TIMER_TICKS(1000 / SAMPLING_RATE_HZ), NULL);
 }
 
 void max30101_init(void) {
     _twi = twi_init(SCL_PIN, SDA_PIN);
-    APP_ERROR_CHECK(enable_gpio_interrupt(INT_PIN, &on_int_interrupt, NRF_GPIOTE_POLARITY_HITOLO,
-                                          NRF_GPIO_PIN_PULLUP));
+    APP_ERROR_CHECK(app_timer_create(&heart_rate_timer_id, APP_TIMER_MODE_REPEATED, timer_cb));
+
 }
