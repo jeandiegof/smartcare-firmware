@@ -53,8 +53,8 @@ typedef enum InterruptSource {
 enum ADXL345Pins {
     SDA_PIN = 27,
     SCL_PIN = 28,
-    INT1_PIN = 29,
-    INT2_PIN = 30,
+    INT1_PIN = 30,
+    INT2_PIN = 29,
 };
 
 // TWI
