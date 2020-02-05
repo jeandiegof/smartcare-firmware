@@ -137,7 +137,7 @@ static void enable_measurement_mode(void) {
 
 // Free-fall detection
 static void setup_free_fall_mode(void) {
-    uint8_t free_fall_threshold[2] = {THRESH_FF, 0x05}; // 0.3g
+    uint8_t free_fall_threshold[2] = {THRESH_FF, 0x0A}; // 0.625g
     twi_write_data(_twi, ADXL345_ADDR, free_fall_threshold, sizeof(free_fall_threshold));
 
     uint8_t free_fall_time[2] = {TIME_FF, 0x14}; // 100ms
