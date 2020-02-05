@@ -746,7 +746,6 @@ int main(void)
         consume_event(RightButtonInterruptionEvt, handle_right_button_interruption);
         NRF_LOG_FLUSH();
         nrf_delay_ms(10);
-        idle_state_handle();
     }
 }
 
