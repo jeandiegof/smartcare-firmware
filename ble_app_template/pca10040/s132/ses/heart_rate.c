@@ -210,7 +210,7 @@ static void process_new_sample(float sample) {
     const bool beat_detected = detect_heart_beat(filtered_sample);
     if (beat_detected) {
         const uint8_t heart_rate = (uint8_t)get_available_bpm();
-        if (heart_rate > 200 || heart_rate < 40) {
+        if (heart_rate > 160 || heart_rate < 40) {
             NRF_LOG_INFO("Invalid heart_rate detected %d.", heart_rate);
             return;
         }
