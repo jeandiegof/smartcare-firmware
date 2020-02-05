@@ -6,6 +6,7 @@
 #include "nrf_log.h"
 #include <stdint.h>
 #include <math.h>
+#include <stdlib.h>
 
 #ifdef MAX30100
 #include "max30100.h"
