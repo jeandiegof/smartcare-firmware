@@ -389,6 +389,7 @@ static void application_timers_start(void)
  */
 static void sleep_mode_enter(void)
 {
+#ifdef PILAR_SLEEP_ENABLED
     ret_code_t err_code;
 
     err_code = bsp_indication_set(BSP_INDICATE_IDLE);
@@ -401,6 +402,7 @@ static void sleep_mode_enter(void)
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
     err_code = sd_power_system_off();
     APP_ERROR_CHECK(err_code);
+#endif
 }
 
 
